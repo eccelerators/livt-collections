@@ -1,0 +1,101 @@
+namespace Livt.Collections.Queue
+
+/**
+ * Synthesizable FIFO queue for up to 64 bytes.
+ */
+component Queue64 : IQueue
+{
+	// Maximum number of stored values.
+	public const CAPACITY: int = 64
+
+	memory: byte[64]
+
+	head: int
+
+	tail: int
+
+	size: int
+
+	/**
+	 * Appends a value when capacity is available.
+	 */
+	override fn Enqueue(value: byte)
+	{
+		if (this.size < CAPACITY) {
+			this.memory[this.tail] = value
+			this.tail++
+
+			if (this.tail == CAPACITY) {
+				this.tail = 0
+			}
+
+			this.size++
+		}
+	}
+
+	/**
+	 * Removes and returns the oldest value, or 0x00 when empty.
+	 */
+	override fn Dequeue() byte
+	{
+		if (this.size > 0) {
+			var element = this.memory[this.head]
+			this.head++
+
+			if (this.head == CAPACITY) {
+				this.head = 0
+			}
+
+			this.size--
+			return element
+		}
+
+		return 0x00
+	}
+
+	/**
+	 * Returns the next readable value without removing it, or 0x00 when empty.
+	 */
+	override fn Peek() byte
+	{
+		if (this.size > 0) {
+			return this.memory[this.head]
+		}
+
+		return 0x00
+	}
+
+	/**
+	 * Returns true when the collection contains no values.
+	 */
+	override fn IsEmpty() bool
+	{
+		return this.size == 0
+	}
+
+	/**
+	 * Returns true when the collection has reached its fixed capacity.
+	 */
+	override fn IsFull() bool
+	{
+		return this.size == CAPACITY
+	}
+
+	/**
+	 * Returns the current logical number of values.
+	 */
+	override fn GetSize() int
+	{
+		return this.size
+	}
+
+	/**
+	 * Resets the logical queue state without erasing storage.
+	 */
+	override fn Clear()
+	{
+		this.head = 0
+		this.tail = 0
+		this.size = 0
+	}
+}

@@ -1,0 +1,52 @@
+namespace Livt.Collections.BitSet
+
+/**
+ * Contract for a fixed-size indexed set of boolean flags.
+ */
+interface IBitSet
+{
+	/**
+	 * Sets one flag; invalid indices are ignored.
+	 */
+	fn Set(index: int)
+
+	/**
+	 * Clears one flag; invalid indices are ignored.
+	 */
+	fn Clear(index: int)
+
+	/**
+	 * Inverts one flag; invalid indices are ignored.
+	 */
+	fn Toggle(index: int)
+
+	/**
+	 * Returns one flag, or false when index is invalid.
+	 */
+	fn IsSet(index: int) bool
+
+	/**
+	 * Clears every flag.
+	 */
+	fn Reset()
+
+	/**
+	 * Returns true when at least one flag is set.
+	 */
+	fn Any() bool
+
+	/**
+	 * Returns true when no flags are set.
+	 */
+	fn None() bool
+
+	/**
+	 * Returns the flags encoded as a non-negative integer bit mask.
+	 */
+	fn GetValue() int
+
+	/**
+	 * Returns the fixed number of addressable flags.
+	 */
+	fn GetCapacity() int
+}

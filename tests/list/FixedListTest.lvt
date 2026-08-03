@@ -1,0 +1,109 @@
+namespace Livt.Collections.Tests.List
+
+using Livt.Collections.List
+
+@Test
+component FixedListTest
+{
+	list8: FixedList8
+
+	list16: FixedList16
+
+	list32: FixedList32
+
+	list64: FixedList64
+
+	new()
+	{
+		this.list8 = new FixedList8()
+		this.list16 = new FixedList16()
+		this.list32 = new FixedList32()
+		this.list64 = new FixedList64()
+	}
+
+	@Test
+	fn TestList8IndexedOperations()
+	{
+		this.list8.Clear()
+		this.list8.Add(0b0000_0001)
+		this.list8.Add(0b0000_0010)
+		this.list8.Add(0b0000_0011)
+		assert this.list8.GetSize() == 3
+		assert this.list8.Get(0) == 0b0000_0001
+		assert this.list8.Get(1) == 0b0000_0010
+		this.list8.Set(1, 0b0000_0100)
+		assert this.list8.Get(1) == 0b0000_0100
+		assert this.list8.RemoveLast() == 0b0000_0011
+		assert this.list8.GetSize() == 2
+	}
+
+	@Test
+	fn TestList16RejectsAddWhenFull()
+	{
+		this.list16.Clear()
+
+		for (var i = 0; i < 16; i++) {
+			this.list16.Add(0b0000_0001)
+		}
+
+		this.list16.Add(0b0000_0010)
+		assert this.list16.IsFull() == true
+		assert this.list16.GetSize() == 16
+		assert this.list16.RemoveLast() == 0b0000_0001
+	}
+
+	@Test
+	fn TestList32Bounds()
+	{
+		this.list32.Clear()
+		this.list32.Add(0b0000_0001)
+		this.list32.Set(-1, 0b0000_0010)
+		this.list32.Set(1, 0b0000_0010)
+		assert this.list32.Get(-1) == 0b0000_0000
+		assert this.list32.Get(1) == 0b0000_0000
+		assert this.list32.Get(0) == 0b0000_0001
+		assert this.list32.GetSize() == 1
+	}
+
+	@Test
+	fn TestList64CapacityAndOrder()
+	{
+		this.list64.Clear()
+		this.list64.Add(0b0000_0010)
+
+		for (var i = 1; i < 64; i++) {
+			this.list64.Add(0b0000_0001)
+		}
+
+		assert this.list64.IsFull() == true
+		assert this.list64.GetSize() == 64
+		assert this.list64.Get(0) == 0b0000_0010
+		assert this.list64.Get(63) == 0b0000_0001
+	}
+
+	@Test
+	fn TestEmptyRemoveAndClear()
+	{
+		this.list8.Clear()
+		assert this.list8.IsEmpty() == true
+		assert this.list8.RemoveLast() == 0b0000_0000
+		this.list8.Add(0b0000_0001)
+		this.list8.Clear()
+		assert this.list8.GetSize() == 0
+		assert this.list8.Get(0) == 0b0000_0000
+	}
+
+	@Test
+	fn TestAddPreservesValuesWrittenBySet()
+	{
+		this.list8.Clear()
+		this.list8.Add(0b0000_0001)
+		this.list8.Add(0b0000_0010)
+		this.list8.Set(0, 0b0000_0011)
+		this.list8.Add(0b0000_0100)
+		assert this.list8.GetSize() == 3
+		assert this.list8.Get(0) == 0b0000_0011
+		assert this.list8.Get(1) == 0b0000_0010
+		assert this.list8.Get(2) == 0b0000_0100
+	}
+}

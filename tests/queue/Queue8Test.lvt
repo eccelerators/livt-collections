@@ -1,0 +1,58 @@
+namespace Livt.Collections.Tests.Queue
+
+using Livt.Collections.Queue
+
+@Test
+component Queue8Test
+{
+	queue: Queue8
+
+	new()
+	{
+		this.queue = new Queue8()
+	}
+
+	@Test
+	fn TestCapacityAndRejectedWrite()
+	{
+		this.queue.Clear()
+
+		for (var i = 0; i < 8; i++) {
+			this.queue.Enqueue(0b0000_0001)
+		}
+
+		this.queue.Enqueue(0b0000_0010)
+		assert this.queue.IsFull() == true
+		assert this.queue.GetSize() == 8
+
+		for (var i = 0; i < 8; i++) {
+			assert this.queue.Dequeue() == 0b0000_0001
+		}
+	}
+
+	@Test
+	fn TestWrapAround()
+	{
+		this.queue.Clear()
+
+		for (var i = 0; i < 8; i++) {
+			this.queue.Enqueue(0b0000_0001)
+		}
+
+		for (var i = 0; i < 4; i++) {
+			this.queue.Dequeue()
+		}
+
+		for (var i = 0; i < 4; i++) {
+			this.queue.Enqueue(0b0000_0010)
+		}
+
+		for (var i = 0; i < 4; i++) {
+			assert this.queue.Dequeue() == 0b0000_0001
+		}
+
+		for (var i = 0; i < 4; i++) {
+			assert this.queue.Dequeue() == 0b0000_0010
+		}
+	}
+}

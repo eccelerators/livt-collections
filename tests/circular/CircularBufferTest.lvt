@@ -1,0 +1,115 @@
+namespace Livt.Collections.Tests.Circular
+
+using Livt.Collections.Circular
+
+@Test
+component CircularBufferTest
+{
+	buffer8: CircularBuffer8
+
+	buffer16: CircularBuffer16
+
+	buffer32: CircularBuffer32
+
+	buffer64: CircularBuffer64
+
+	new()
+	{
+		this.buffer8 = new CircularBuffer8()
+		this.buffer16 = new CircularBuffer16()
+		this.buffer32 = new CircularBuffer32()
+		this.buffer64 = new CircularBuffer64()
+	}
+
+	@Test
+	fn TestBuffer8OverwritesOldest()
+	{
+		this.buffer8.Clear()
+		this.buffer8.Write(0b0000_0001)
+
+		for (var i = 1; i < 8; i++) {
+			this.buffer8.Write(0b0000_0010)
+		}
+
+		this.buffer8.Write(0b0000_0011)
+		assert this.buffer8.IsFull() == true
+		assert this.buffer8.GetSize() == 8
+		assert this.buffer8.Read() == 0b0000_0010
+	}
+
+	@Test
+	fn TestBuffer16Capacity()
+	{
+		this.buffer16.Clear()
+
+		for (var i = 0; i < 16; i++) {
+			this.buffer16.Write(0b0000_0001)
+		}
+
+		this.buffer16.Write(0b0000_0010)
+		assert this.buffer16.IsFull() == true
+		assert this.buffer16.GetSize() == 16
+		assert this.buffer16.Read() == 0b0000_0001
+	}
+
+	@Test
+	fn TestBuffer32WrapAround()
+	{
+		this.buffer32.Clear()
+
+		for (var i = 0; i < 32; i++) {
+			this.buffer32.Write(0b0000_0001)
+		}
+
+		for (var i = 0; i < 16; i++) {
+			this.buffer32.Read()
+		}
+
+		for (var i = 0; i < 16; i++) {
+			this.buffer32.Write(0b0000_0010)
+		}
+
+		for (var i = 0; i < 16; i++) {
+			assert this.buffer32.Read() == 0b0000_0001
+		}
+
+		for (var i = 0; i < 16; i++) {
+			assert this.buffer32.Read() == 0b0000_0010
+		}
+
+		assert this.buffer32.IsEmpty() == true
+	}
+
+	@Test
+	fn TestBuffer64FifoAndOverwrite()
+	{
+		this.buffer64.Clear()
+		this.buffer64.Write(0b0000_0001)
+
+		for (var i = 1; i < 64; i++) {
+			this.buffer64.Write(0b0000_0010)
+		}
+
+		this.buffer64.Write(0b0000_0011)
+		assert this.buffer64.GetSize() == 64
+
+		for (var i = 0; i < 63; i++) {
+			assert this.buffer64.Read() == 0b0000_0010
+		}
+
+		assert this.buffer64.Read() == 0b0000_0011
+	}
+
+	@Test
+	fn TestEmptyReadPeekAndClear()
+	{
+		this.buffer8.Clear()
+		assert this.buffer8.Read() == 0b0000_0000
+		assert this.buffer8.Peek() == 0b0000_0000
+		this.buffer8.Write(0b0000_0011)
+		assert this.buffer8.Peek() == 0b0000_0011
+		assert this.buffer8.GetSize() == 1
+		this.buffer8.Clear()
+		assert this.buffer8.IsEmpty() == true
+	}
+}

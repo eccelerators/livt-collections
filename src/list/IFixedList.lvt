@@ -1,0 +1,50 @@
+namespace Livt.Collections.List
+
+/**
+ * Contract for a byte list with fixed storage and a variable logical size.
+ *
+ * Implementations ignore additions while full and reject indices outside the
+ * logical size. Invalid and empty reads return 0x00.
+ */
+interface IFixedList
+{
+	/**
+	 * Appends a value when capacity is available.
+	 */
+	fn Add(value: byte)
+
+	/**
+	 * Returns the value at index, or 0x00 when index is invalid.
+	 */
+	fn Get(index: int) byte
+
+	/**
+	 * Replaces an existing value; invalid indices are ignored.
+	 */
+	fn Set(index: int, value: byte)
+
+	/**
+	 * Removes and returns the final value, or 0x00 when empty.
+	 */
+	fn RemoveLast() byte
+
+	/**
+	 * Returns the current logical number of values.
+	 */
+	fn GetSize() int
+
+	/**
+	 * Returns true when the list contains no values.
+	 */
+	fn IsEmpty() bool
+
+	/**
+	 * Returns true when the list has reached its fixed capacity.
+	 */
+	fn IsFull() bool
+
+	/**
+	 * Resets the logical list state without erasing storage.
+	 */
+	fn Clear()
+}

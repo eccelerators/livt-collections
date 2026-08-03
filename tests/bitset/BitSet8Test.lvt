@@ -1,0 +1,67 @@
+namespace Livt.Collections.Tests.BitSet
+
+using Livt.Collections.BitSet
+
+@Test
+component BitSet8Test
+{
+	bits: BitSet8
+
+	new()
+	{
+		this.bits = new BitSet8()
+	}
+
+	@Test
+	fn TestSetClearAndValue()
+	{
+		this.bits.Reset()
+		this.bits.Set(0)
+		this.bits.Set(2)
+		this.bits.Set(7)
+		assert this.bits.IsSet(0) == true
+		assert this.bits.IsSet(2) == true
+		assert this.bits.IsSet(7) == true
+		assert this.bits.GetValue() == 133
+		this.bits.Clear(2)
+		assert this.bits.GetValue() == 129
+	}
+
+	@Test
+	fn TestToggle()
+	{
+		this.bits.Reset()
+		this.bits.Toggle(3)
+		assert this.bits.IsSet(3) == true
+		this.bits.Toggle(3)
+		assert this.bits.IsSet(3) == false
+	}
+
+	@Test
+	fn TestAnyNoneAndReset()
+	{
+		this.bits.Reset()
+		assert this.bits.None() == true
+		assert this.bits.Any() == false
+		this.bits.Set(5)
+		assert this.bits.Any() == true
+		assert this.bits.None() == false
+		this.bits.Reset()
+		assert this.bits.None() == true
+	}
+
+	@Test
+	fn TestBoundsAndCapacity()
+	{
+		this.bits.Reset()
+		this.bits.Set(-1)
+		this.bits.Set(8)
+		this.bits.Toggle(9)
+		this.bits.Clear(-1)
+		this.bits.Clear(8)
+		assert this.bits.GetValue() == 0
+		assert this.bits.IsSet(-1) == false
+		assert this.bits.IsSet(8) == false
+		assert this.bits.GetCapacity() == 8
+	}
+}

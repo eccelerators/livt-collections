@@ -1,0 +1,44 @@
+namespace Livt.Collections.Queue
+
+/**
+ * Contract for a fixed-capacity, byte-oriented FIFO queue.
+ *
+ * Implementations ignore writes while full. Empty reads return 0x00.
+ */
+interface IQueue
+{
+	/**
+	 * Appends a value when capacity is available.
+	 */
+	fn Enqueue(value: byte)
+
+	/**
+	 * Removes and returns the oldest value, or 0x00 when empty.
+	 */
+	fn Dequeue() byte
+
+	/**
+	 * Returns the oldest value without removing it, or 0x00 when empty.
+	 */
+	fn Peek() byte
+
+	/**
+	 * Returns true when the queue contains no values.
+	 */
+	fn IsEmpty() bool
+
+	/**
+	 * Returns true when the queue has reached its fixed capacity.
+	 */
+	fn IsFull() bool
+
+	/**
+	 * Returns the current number of queued values.
+	 */
+	fn GetSize() int
+
+	/**
+	 * Resets the logical queue state without erasing storage.
+	 */
+	fn Clear()
+}

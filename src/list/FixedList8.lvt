@@ -1,0 +1,96 @@
+namespace Livt.Collections.List
+
+/**
+ * Synthesizable fixed-capacity list for up to 8 bytes.
+ */
+component FixedList8 : IFixedList
+{
+	// Maximum number of stored values.
+	public const CAPACITY: int = 8
+
+	memory: byte[8]
+
+	count: int
+
+	/**
+	 * Appends a value when capacity is available.
+	 */
+	override fn Add(value: byte)
+	{
+		if (this.count < CAPACITY) {
+			this.memory[this.count] = value
+			this.count++
+		}
+	}
+
+	/**
+	 * Returns the value at index, or 0x00 when index is invalid.
+	 */
+	override fn Get(index: int) byte
+	{
+		if (index >= 0) {
+			if (index < this.count) {
+				return this.memory[index]
+			}
+		}
+
+		return 0x00
+	}
+
+	/**
+	 * Replaces an existing value; invalid indices are ignored.
+	 */
+	override fn Set(index: int, value: byte)
+	{
+		if (index >= 0) {
+			if (index < this.count) {
+				this.memory[index] = value
+			}
+		}
+	}
+
+	/**
+	 * Removes and returns the final value, or 0x00 when empty.
+	 */
+	override fn RemoveLast() byte
+	{
+		if (this.count > 0) {
+			this.count--
+			return this.memory[this.count]
+		}
+
+		return 0x00
+	}
+
+	/**
+	 * Returns the current logical number of values.
+	 */
+	override fn GetSize() int
+	{
+		return this.count
+	}
+
+	/**
+	 * Returns true when the collection contains no values.
+	 */
+	override fn IsEmpty() bool
+	{
+		return this.count == 0
+	}
+
+	/**
+	 * Returns true when the collection has reached its fixed capacity.
+	 */
+	override fn IsFull() bool
+	{
+		return this.count == CAPACITY
+	}
+
+	/**
+	 * Resets the logical list state without erasing storage.
+	 */
+	override fn Clear()
+	{
+		this.count = 0
+	}
+}

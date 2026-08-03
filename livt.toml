@@ -1,0 +1,27 @@
+[project]
+name = "Livt.Collections"
+version = "0.1.0"
+path = "src"
+outdir = "out"
+
+[tests]
+path = "tests"
+components = [
+    "Queue8Test",
+    "Queue16Test",
+    "Queue32Test",
+    "Queue64Test",
+    "Stack8Test",
+    "Stack16Test",
+    "Stack32Test",
+    "Stack64Test",
+    "CircularBufferTest",
+    "FixedListTest",
+    "BitSet8Test"
+]
+
+[build.debug]
+warnings = ["all"]
+
+[build.release]
+warnings = ["all"]

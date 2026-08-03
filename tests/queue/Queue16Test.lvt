@@ -1,0 +1,42 @@
+namespace Livt.Collections.Tests.Queue
+
+using Livt.Collections.Queue
+
+@Test
+component Queue16Test
+{
+	queue: Queue16
+
+	new()
+	{
+		this.queue = new Queue16()
+	}
+
+	@Test
+	fn TestCapacityAndFifoOrder()
+	{
+		this.queue.Clear()
+
+		for (var i = 0; i < 15; i++) {
+			this.queue.Enqueue(0b0000_0001)
+		}
+
+		this.queue.Enqueue(0b0000_0010)
+		assert this.queue.IsFull() == true
+		assert this.queue.GetSize() == 16
+
+		for (var i = 0; i < 15; i++) {
+			assert this.queue.Dequeue() == 0b0000_0001
+		}
+
+		assert this.queue.Dequeue() == 0b0000_0010
+	}
+
+	@Test
+	fn TestEmptyReadsReturnZero()
+	{
+		this.queue.Clear()
+		assert this.queue.Peek() == 0b0000_0000
+		assert this.queue.Dequeue() == 0b0000_0000
+	}
+}

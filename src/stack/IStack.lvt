@@ -1,0 +1,44 @@
+namespace Livt.Collections.Stack
+
+/**
+ * Contract for a fixed-capacity, byte-oriented LIFO stack.
+ *
+ * Implementations ignore writes while full. Empty reads return 0x00.
+ */
+interface IStack
+{
+	/**
+	 * Appends a value to the top when capacity is available.
+	 */
+	fn Push(value: byte)
+
+	/**
+	 * Removes and returns the newest value, or 0x00 when empty.
+	 */
+	fn Pop() byte
+
+	/**
+	 * Returns the newest value without removing it, or 0x00 when empty.
+	 */
+	fn Peek() byte
+
+	/**
+	 * Returns true when the stack contains no values.
+	 */
+	fn IsEmpty() bool
+
+	/**
+	 * Returns true when the stack has reached its fixed capacity.
+	 */
+	fn IsFull() bool
+
+	/**
+	 * Returns the current number of stacked values.
+	 */
+	fn GetSize() int
+
+	/**
+	 * Resets the logical stack state without erasing storage.
+	 */
+	fn Clear()
+}

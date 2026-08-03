@@ -1,0 +1,73 @@
+namespace Livt.Collections.Tests.Queue
+
+using Livt.Collections.Queue
+
+@Test
+component Queue32Test
+{
+	queue: Queue32
+
+	new()
+	{
+		this.queue = new Queue32()
+	}
+
+	@Test
+	fn TestFifoOrderAndPeek()
+	{
+		this.queue.Clear()
+		this.queue.Enqueue(0b0000_0001)
+		this.queue.Enqueue(0b0000_0010)
+		this.queue.Enqueue(0b0000_0011)
+		assert this.queue.Peek() == 0b0000_0001
+		assert this.queue.GetSize() == 3
+		assert this.queue.Dequeue() == 0b0000_0001
+		assert this.queue.Dequeue() == 0b0000_0010
+		assert this.queue.Dequeue() == 0b0000_0011
+		assert this.queue.IsEmpty() == true
+	}
+
+	@Test
+	fn TestFullQueueRejectsAdditionalElement()
+	{
+		this.queue.Clear()
+
+		for (var i = 0; i < 32; i++) {
+			this.queue.Enqueue(0b0000_0001)
+		}
+
+		this.queue.Enqueue(0b0000_0010)
+		assert this.queue.IsFull() == true
+		assert this.queue.GetSize() == 32
+
+		for (var i = 0; i < 32; i++) {
+			assert this.queue.Dequeue() == 0b0000_0001
+		}
+	}
+
+	@Test
+	fn TestWrapAround()
+	{
+		this.queue.Clear()
+
+		for (var i = 0; i < 32; i++) {
+			this.queue.Enqueue(0b0000_0001)
+		}
+
+		for (var i = 0; i < 16; i++) {
+			this.queue.Dequeue()
+		}
+
+		for (var i = 0; i < 16; i++) {
+			this.queue.Enqueue(0b0000_0010)
+		}
+
+		for (var i = 0; i < 16; i++) {
+			assert this.queue.Dequeue() == 0b0000_0001
+		}
+
+		for (var i = 0; i < 16; i++) {
+			assert this.queue.Dequeue() == 0b0000_0010
+		}
+	}
+}

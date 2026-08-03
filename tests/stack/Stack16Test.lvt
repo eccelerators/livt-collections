@@ -1,0 +1,45 @@
+namespace Livt.Collections.Tests.Stack
+
+using Livt.Collections.Stack
+
+@Test
+component Stack16Test
+{
+	stack: Stack16
+
+	new()
+	{
+		this.stack = new Stack16()
+	}
+
+	@Test
+	fn TestCapacityAndLifoOrder()
+	{
+		this.stack.Clear()
+		this.stack.Push(0b0000_0010)
+
+		for (var i = 1; i < 16; i++) {
+			this.stack.Push(0b0000_0001)
+		}
+
+		assert this.stack.IsFull() == true
+		assert this.stack.GetSize() == 16
+
+		for (var i = 1; i < 16; i++) {
+			assert this.stack.Pop() == 0b0000_0001
+		}
+
+		assert this.stack.Pop() == 0b0000_0010
+	}
+
+	@Test
+	fn TestClearAllowsReuse()
+	{
+		this.stack.Clear()
+		this.stack.Push(0b0000_0001)
+		this.stack.Clear()
+		this.stack.Push(0b0000_0010)
+		assert this.stack.GetSize() == 1
+		assert this.stack.Pop() == 0b0000_0010
+	}
+}

@@ -1,0 +1,192 @@
+namespace Livt.Collections.BitSet
+
+/**
+ * Synthesizable set of eight independently addressable boolean flags.
+ *
+ * Independent fields avoid the current stale staging behavior of indexed
+ * writes to a shared logic vector.
+ */
+component BitSet8 : IBitSet
+{
+	// Number of addressable flags.
+	public const CAPACITY: int = 8
+
+	bit0: bool
+
+	bit1: bool
+
+	bit2: bool
+
+	bit3: bool
+
+	bit4: bool
+
+	bit5: bool
+
+	bit6: bool
+
+	bit7: bool
+
+	/**
+	 * Sets one flag; invalid indices are ignored.
+	 */
+	override fn Set(index: int)
+	{
+		if (index == 0) { this.bit0 = true }
+
+		if (index == 1) { this.bit1 = true }
+
+		if (index == 2) { this.bit2 = true }
+
+		if (index == 3) { this.bit3 = true }
+
+		if (index == 4) { this.bit4 = true }
+
+		if (index == 5) { this.bit5 = true }
+
+		if (index == 6) { this.bit6 = true }
+
+		if (index == 7) { this.bit7 = true }
+	}
+
+	/**
+	 * Clears one flag; invalid indices are ignored.
+	 */
+	override fn Clear(index: int)
+	{
+		if (index == 0) { this.bit0 = false }
+
+		if (index == 1) { this.bit1 = false }
+
+		if (index == 2) { this.bit2 = false }
+
+		if (index == 3) { this.bit3 = false }
+
+		if (index == 4) { this.bit4 = false }
+
+		if (index == 5) { this.bit5 = false }
+
+		if (index == 6) { this.bit6 = false }
+
+		if (index == 7) { this.bit7 = false }
+	}
+
+	/**
+	 * Inverts one flag; invalid indices are ignored.
+	 */
+	override fn Toggle(index: int)
+	{
+		if (index == 0) { this.bit0 = this.bit0 == false }
+
+		if (index == 1) { this.bit1 = this.bit1 == false }
+
+		if (index == 2) { this.bit2 = this.bit2 == false }
+
+		if (index == 3) { this.bit3 = this.bit3 == false }
+
+		if (index == 4) { this.bit4 = this.bit4 == false }
+
+		if (index == 5) { this.bit5 = this.bit5 == false }
+
+		if (index == 6) { this.bit6 = this.bit6 == false }
+
+		if (index == 7) { this.bit7 = this.bit7 == false }
+	}
+
+	/**
+	 * Returns one flag, or false when index is invalid.
+	 */
+	override fn IsSet(index: int) bool
+	{
+		if (index == 0) { return this.bit0 == true }
+
+		if (index == 1) { return this.bit1 == true }
+
+		if (index == 2) { return this.bit2 == true }
+
+		if (index == 3) { return this.bit3 == true }
+
+		if (index == 4) { return this.bit4 == true }
+
+		if (index == 5) { return this.bit5 == true }
+
+		if (index == 6) { return this.bit6 == true }
+
+		if (index == 7) { return this.bit7 == true }
+
+		return false
+	}
+
+	/**
+	 * Clears every flag.
+	 */
+	override fn Reset()
+	{
+		this.bit0 = false
+		this.bit1 = false
+		this.bit2 = false
+		this.bit3 = false
+		this.bit4 = false
+		this.bit5 = false
+		this.bit6 = false
+		this.bit7 = false
+	}
+
+	/**
+	 * Returns true when at least one flag is set.
+	 */
+	override fn Any() bool
+	{
+		return this.bit0 || this.bit1 || this.bit2 || this.bit3 || this.bit4 || this.bit5 || this.bit6 || this.bit7
+	}
+
+	/**
+	 * Returns true when no flags are set.
+	 */
+	override fn None() bool
+	{
+		if (this.bit0 || this.bit1 || this.bit2 || this.bit3) {
+			return false
+		}
+
+		if (this.bit4 || this.bit5 || this.bit6 || this.bit7) {
+			return false
+		}
+
+		return true
+	}
+
+	/**
+	 * Returns the flags encoded as a non-negative integer bit mask.
+	 */
+	override fn GetValue() int
+	{
+		var result: int = 0
+
+		if (this.bit0 == true) { result = result + 1 }
+
+		if (this.bit1 == true) { result = result + 2 }
+
+		if (this.bit2 == true) { result = result + 4 }
+
+		if (this.bit3 == true) { result = result + 8 }
+
+		if (this.bit4 == true) { result = result + 16 }
+
+		if (this.bit5 == true) { result = result + 32 }
+
+		if (this.bit6 == true) { result = result + 64 }
+
+		if (this.bit7 == true) { result = result + 128 }
+
+		return result
+	}
+
+	/**
+	 * Returns the fixed number of addressable flags.
+	 */
+	override fn GetCapacity() int
+	{
+		return CAPACITY
+	}
+}

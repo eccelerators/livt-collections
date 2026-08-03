@@ -1,0 +1,40 @@
+namespace Livt.Collections.Tests.Stack
+
+using Livt.Collections.Stack
+
+@Test
+component Stack8Test
+{
+	stack: Stack8
+
+	new()
+	{
+		this.stack = new Stack8()
+	}
+
+	@Test
+	fn TestCapacityAndRejectedPush()
+	{
+		this.stack.Clear()
+
+		for (var i = 0; i < 8; i++) {
+			this.stack.Push(0b0000_0001)
+		}
+
+		this.stack.Push(0b0000_0010)
+		assert this.stack.IsFull() == true
+		assert this.stack.GetSize() == 8
+
+		for (var i = 0; i < 8; i++) {
+			assert this.stack.Pop() == 0b0000_0001
+		}
+	}
+
+	@Test
+	fn TestEmptyReadsReturnZero()
+	{
+		this.stack.Clear()
+		assert this.stack.Peek() == 0b0000_0000
+		assert this.stack.Pop() == 0b0000_0000
+	}
+}

@@ -1,0 +1,58 @@
+namespace Livt.Collections.Tests.Stack
+
+using Livt.Collections.Stack
+
+@Test
+component Stack32Test
+{
+	stack: Stack32
+
+	new()
+	{
+		this.stack = new Stack32()
+	}
+
+	@Test
+	fn TestLifoOrderAndPeek()
+	{
+		this.stack.Clear()
+		this.stack.Push(0b0000_0001)
+		this.stack.Push(0b0000_0010)
+		this.stack.Push(0b0000_0011)
+		assert this.stack.Peek() == 0b0000_0011
+		assert this.stack.GetSize() == 3
+		assert this.stack.Pop() == 0b0000_0011
+		assert this.stack.Pop() == 0b0000_0010
+		assert this.stack.Pop() == 0b0000_0001
+		assert this.stack.IsEmpty() == true
+	}
+
+	@Test
+	fn TestFullStackRejectsAdditionalElement()
+	{
+		this.stack.Clear()
+
+		for (var i = 0; i < 32; i++) {
+			this.stack.Push(0b0000_0001)
+		}
+
+		this.stack.Push(0b0000_0010)
+		assert this.stack.IsFull() == true
+		assert this.stack.GetSize() == 32
+
+		for (var i = 0; i < 32; i++) {
+			assert this.stack.Pop() == 0b0000_0001
+		}
+	}
+
+	@Test
+	fn TestClearAllowsReuse()
+	{
+		this.stack.Clear()
+		this.stack.Push(0b0000_0001)
+		this.stack.Clear()
+		this.stack.Push(0b0000_0010)
+		assert this.stack.GetSize() == 1
+		assert this.stack.Pop() == 0b0000_0010
+	}
+}

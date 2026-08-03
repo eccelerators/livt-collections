@@ -1,0 +1,61 @@
+namespace Livt.Collections.Tests.Queue
+
+using Livt.Collections.Queue
+
+@Test
+component Queue64Test
+{
+	queue: Queue64
+
+	new()
+	{
+		this.queue = new Queue64()
+	}
+
+	@Test
+	fn TestCapacityAndFifoOrder()
+	{
+		this.queue.Clear()
+
+		for (var i = 0; i < 63; i++) {
+			this.queue.Enqueue(0b0000_0001)
+		}
+
+		this.queue.Enqueue(0b0000_0010)
+		assert this.queue.IsFull() == true
+		assert this.queue.GetSize() == 64
+
+		for (var i = 0; i < 63; i++) {
+			assert this.queue.Dequeue() == 0b0000_0001
+		}
+
+		assert this.queue.Dequeue() == 0b0000_0010
+		assert this.queue.IsEmpty() == true
+	}
+
+	@Test
+	fn TestWrapAround()
+	{
+		this.queue.Clear()
+
+		for (var i = 0; i < 64; i++) {
+			this.queue.Enqueue(0b0000_0001)
+		}
+
+		for (var i = 0; i < 32; i++) {
+			this.queue.Dequeue()
+		}
+
+		for (var i = 0; i < 32; i++) {
+			this.queue.Enqueue(0b0000_0010)
+		}
+
+		for (var i = 0; i < 32; i++) {
+			assert this.queue.Dequeue() == 0b0000_0001
+		}
+
+		for (var i = 0; i < 32; i++) {
+			assert this.queue.Dequeue() == 0b0000_0010
+		}
+	}
+}
