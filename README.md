@@ -14,7 +14,7 @@ values use the Livt `byte` type.
 
 ```toml
 [dependencies]
-Livt.Collections = "0.1.0"
+Livt.Collections = "1.0.1"
 ```
 
 `Livt.Collections` supersedes the standalone Queue, Stack, CircularBuffer, and
