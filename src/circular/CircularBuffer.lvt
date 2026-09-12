@@ -1,0 +1,115 @@
+namespace Livt.Collections.Circular
+
+/**
+ * Overwrite-on-full ring storage selected by element type and compile-time size.
+ * Empty reads return the element type's zero value.
+ */
+component CircularBuffer<T, CAPACITY: int = 64> : ICircularBuffer<T>
+{
+	static assert CAPACITY > 0, "Circular-buffer capacity must be positive"
+
+	// Capacity-derived ring-address and logical occupancy widths.
+	const ADDRESS_BITS: int = Bits.RequiredFor(CAPACITY - 1)
+	const COUNT_BITS: int = Bits.RequiredFor(CAPACITY)
+
+	// Backing cells retain inactive values across Clear; size defines validity.
+	@UninitializedStorage
+	storage: T[CAPACITY]
+
+	// Ring positions, logical occupancy, and the value returned by empty reads.
+	head: logic[ADDRESS_BITS]
+	tail: logic[ADDRESS_BITS]
+	size: logic[COUNT_BITS]
+	zero: T
+
+	/**
+	 * Appends a value, overwriting the oldest value when full.
+	 */
+	override fn Write(value: T)
+	{
+		if ((this.size as uint) == (CAPACITY as uint)) {
+			if ((this.head as uint) == ((CAPACITY - 1) as uint)) {
+				this.head = 0
+			} else {
+				this.head = ((this.head as uint) + 1) as logic[ADDRESS_BITS]
+			}
+		}
+
+		if ((this.size as uint) < (CAPACITY as uint)) {
+			this.size = ((this.size as uint) + 1) as logic[COUNT_BITS]
+		}
+
+		this.storage[this.tail as uint] = value
+
+		if ((this.tail as uint) == ((CAPACITY - 1) as uint)) {
+			this.tail = 0
+		} else {
+			this.tail = ((this.tail as uint) + 1) as logic[ADDRESS_BITS]
+		}
+	}
+
+	/**
+	 * Removes and returns the oldest value, or zero when empty.
+	 */
+	override fn Read() T
+	{
+		if ((this.size as uint) > 0) {
+			var value = this.storage[this.head as uint]
+
+			if ((this.head as uint) == ((CAPACITY - 1) as uint)) {
+				this.head = 0
+			} else {
+				this.head = ((this.head as uint) + 1) as logic[ADDRESS_BITS]
+			}
+
+			this.size = ((this.size as uint) - 1) as logic[COUNT_BITS]
+			return value
+		}
+
+		return this.zero
+	}
+
+	/**
+	 * Returns the oldest value without removing it, or zero when empty.
+	 */
+	override fn Peek() T
+	{
+		if ((this.size as uint) > 0) { return this.storage[this.head as uint] }
+
+		return this.zero
+	}
+
+	/**
+	 * Returns true when the buffer contains no values.
+	 */
+	override fn IsEmpty() bool
+	{
+		return (this.size as uint) == 0
+	}
+
+	/**
+	 * Returns true when the buffer has reached its configured capacity.
+	 */
+	override fn IsFull() bool
+	{
+		return (this.size as uint) == (CAPACITY as uint)
+	}
+
+	/**
+	 * Returns the current number of buffered values.
+	 */
+	override fn GetSize() int
+	{
+		return (this.size as uint) as int
+	}
+
+	/**
+	 * Resets ring positions and occupancy without erasing inactive storage cells.
+	 */
+	override fn Clear()
+	{
+		this.head = 0
+		this.tail = 0
+		this.size = 0
+	}
+}

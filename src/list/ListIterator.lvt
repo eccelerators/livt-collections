@@ -1,0 +1,51 @@
+namespace Livt.Collections.List
+
+using Livt.Lang
+
+/**
+ * A caller-owned cursor over an existing typed list; list storage is not copied.
+ * The list must remain unchanged during traversal. Separate cursors have
+ * independent positions but do not provide synchronization for list mutation.
+ */
+component ListIterator<T> : IResettableIterator<T>
+{
+	// Borrowed list reference and cursor position; the iterator owns no elements.
+	source: IList<T>
+	position: int
+
+	/**
+	 * Binds the borrowed list and positions the cursor before its first value.
+	 */
+	new(source: IList<T>)
+	{
+		this.source = source
+		this.position = 0
+	}
+
+	/**
+	 * Rewinds the cursor without changing the source list.
+	 */
+	override fn Reset()
+	{
+		this.position = 0
+	}
+
+	/**
+	 * Returns true when the current source size contains another value.
+	 */
+	override fn HasNext() bool
+	{
+		return this.position < this.source.GetSize()
+	}
+
+	/**
+	 * Returns the current value and advances; callers must check HasNext first.
+	 */
+	override fn Next() T
+	{
+		assert this.position < this.source.GetSize(), "List iterator is exhausted"
+		var value = this.source.Get(this.position)
+		this.position++
+		return value
+	}
+}

@@ -3,22 +3,22 @@ namespace Livt.Collections.Tests.List
 using Livt.Collections.List
 
 @Test
-component FixedListTest
+component ListTest
 {
-	list8: FixedList8
+	list8: List8
 
-	list16: FixedList16
+	list16: List16
 
-	list32: FixedList32
+	list32: List32
 
-	list64: FixedList64
+	list64: List64
 
 	new()
 	{
-		this.list8 = new FixedList8()
-		this.list16 = new FixedList16()
-		this.list32 = new FixedList32()
-		this.list64 = new FixedList64()
+		this.list8 = new List8()
+		this.list16 = new List16()
+		this.list32 = new List32()
+		this.list64 = new List64()
 	}
 
 	@Test

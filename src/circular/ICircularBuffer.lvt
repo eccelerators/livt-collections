@@ -1,26 +1,27 @@
 namespace Livt.Collections.Circular
 
 /**
- * Contract for a fixed-capacity, byte-oriented circular buffer.
+ * Contract for a typed fixed-capacity circular buffer.
  *
- * Writes to a full buffer overwrite the oldest value. Empty reads return 0x00.
+ * Writes to a full buffer overwrite the oldest value. Empty reads return the
+ * element type's zero value.
  */
-interface ICircularBuffer
+interface ICircularBuffer<T>
 {
 	/**
 	 * Appends a value, overwriting the oldest value when full.
 	 */
-	fn Write(value: byte)
+	fn Write(value: T)
 
 	/**
-	 * Removes and returns the oldest value, or 0x00 when empty.
+	 * Removes and returns the oldest value, or zero when empty.
 	 */
-	fn Read() byte
+	fn Read() T
 
 	/**
-	 * Returns the oldest value without removing it, or 0x00 when empty.
+	 * Returns the oldest value without removing it, or zero when empty.
 	 */
-	fn Peek() byte
+	fn Peek() T
 
 	/**
 	 * Returns true when the buffer contains no values.

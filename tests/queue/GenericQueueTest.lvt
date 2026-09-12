@@ -1,0 +1,48 @@
+namespace Livt.Collections.Tests
+
+using Livt.Collections
+
+/**
+ * Checks serialized transactions and unambiguous empty results.
+ */
+@Test
+component GenericQueueTest
+{
+	queue: Livt.Collections.Queue<byte, 3>
+
+	/**
+	 * Creates a non-power-of-two queue.
+	 */
+	new()
+	{
+		this.queue = new Livt.Collections.Queue<byte, 3>()
+	}
+
+	/**
+	 * Verifies rejection, FIFO ordering and repeated wraparound.
+	 */
+	@Test
+	fn TestTransactions()
+	{
+		this.queue.Clear()
+		var value: byte = 0xFF
+		assert this.queue.TryDequeue(value) == false
+		assert value == 0x00
+
+		for (var round = 0; round < 3; round++) {
+			assert this.queue.TryEnqueue(0x11) == true
+			assert this.queue.TryEnqueue(0x22) == true
+			assert this.queue.TryEnqueue(0x33) == true
+			assert this.queue.GetCount() == 3
+			assert this.queue.GetSpace() == 0
+			assert this.queue.TryEnqueue(0xFF) == false
+			assert this.queue.TryDequeue(value) == true
+			assert value == 0x11
+			assert this.queue.TryDequeue(value) == true
+			assert value == 0x22
+			assert this.queue.TryDequeue(value) == true
+			assert value == 0x33
+			assert this.queue.GetCount() == 0
+		}
+	}
+}

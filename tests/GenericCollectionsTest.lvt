@@ -1,0 +1,123 @@
+namespace Livt.Collections.Tests
+
+using Livt.Collections.Circular
+using Livt.Collections.List
+using Livt.Collections.Stack
+
+/**
+ * Verifies typed, non-power-of-two generic collections and their interfaces.
+ */
+@Test
+component GenericCollectionsTest
+{
+	// Interface-owned implementations prove contracts remain independent of capacity.
+	stackContract: IStack<int>
+	listContract: IList<bool>
+	bufferContract: ICircularBuffer<int>
+	iterator: ListIterator<bool>
+
+	// Single-entry implementations cover the minimum supported capacity.
+	singleStack: IStack<byte>
+	singleList: IList<byte>
+	singleBuffer: ICircularBuffer<byte>
+
+	/**
+	 * Creates one instance per family and exposes each through its generic contract.
+	 */
+	new()
+	{
+		this.stackContract = new Stack<int, 3>()
+		this.listContract = new List<bool, 3>()
+		this.bufferContract = new CircularBuffer<int, 3>()
+		this.iterator = new ListIterator<bool>(this.listContract)
+		this.singleStack = new Stack<byte, 1>()
+		this.singleList = new List<byte, 1>()
+		this.singleBuffer = new CircularBuffer<byte, 1>()
+	}
+
+	/**
+	 * Verifies that the minimum capacity uses valid counters and ring wrapping.
+	 */
+	@Test
+	fn TestSingleEntryCollections()
+	{
+		this.singleStack.Clear()
+		this.singleStack.Push(7)
+		this.singleStack.Push(8)
+		assert this.singleStack.IsFull()
+		assert this.singleStack.Pop() == 7
+		assert this.singleStack.Pop() == 0
+
+		this.singleList.Clear()
+		this.singleList.Add(9)
+		this.singleList.Add(10)
+		assert this.singleList.IsFull()
+		assert this.singleList.Get(0) == 9
+		assert this.singleList.RemoveLast()
+
+		this.singleBuffer.Clear()
+		this.singleBuffer.Write(11)
+		this.singleBuffer.Write(12)
+		assert this.singleBuffer.IsFull()
+		assert this.singleBuffer.Read() == 12
+		assert this.singleBuffer.Read() == 0
+	}
+
+	/**
+	 * Verifies typed LIFO ordering, full rejection, and empty zero values.
+	 */
+	@Test
+	fn TestGenericStackContract()
+	{
+		this.stackContract.Clear()
+		this.stackContract.Push(11)
+		this.stackContract.Push(22)
+		this.stackContract.Push(33)
+		this.stackContract.Push(44)
+		assert this.stackContract.IsFull()
+		assert this.stackContract.GetSize() == 3
+		assert this.stackContract.Pop() == 33
+		assert this.stackContract.Pop() == 22
+		assert this.stackContract.Pop() == 11
+		assert this.stackContract.Pop() == 0
+	}
+
+	/**
+	 * Verifies typed indexed access, bounds handling, and logical clearing.
+	 */
+	@Test
+	fn TestGenericListContract()
+	{
+		this.listContract.Clear()
+		this.listContract.Add(true)
+		this.listContract.Add(false)
+		this.listContract.Set(1, true)
+		assert this.listContract.Get(0)
+		assert this.listContract.Get(1)
+		assert this.listContract.Get(2) == false
+		assert this.listContract.RemoveLast()
+		assert this.listContract.GetSize() == 1
+		this.iterator.Reset()
+		assert this.iterator.HasNext()
+		assert this.iterator.Next()
+		assert this.iterator.HasNext() == false
+	}
+
+	/**
+	 * Verifies typed FIFO ordering and overwrite behavior after ring wrapping.
+	 */
+	@Test
+	fn TestGenericCircularBufferContract()
+	{
+		this.bufferContract.Clear()
+		this.bufferContract.Write(10)
+		this.bufferContract.Write(20)
+		this.bufferContract.Write(30)
+		this.bufferContract.Write(40)
+		assert this.bufferContract.IsFull()
+		assert this.bufferContract.Read() == 20
+		assert this.bufferContract.Read() == 30
+		assert this.bufferContract.Read() == 40
+		assert this.bufferContract.Read() == 0
+	}
+}

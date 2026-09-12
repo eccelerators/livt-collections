@@ -1,26 +1,27 @@
 namespace Livt.Collections.Stack
 
 /**
- * Contract for a fixed-capacity, byte-oriented LIFO stack.
+ * Contract for a fixed-capacity LIFO stack independent of element type.
  *
- * Implementations ignore writes while full. Empty reads return 0x00.
+ * Implementations ignore writes while full. Empty reads return the element
+ * type's zero value.
  */
-interface IStack
+interface IStack<T>
 {
 	/**
 	 * Appends a value to the top when capacity is available.
 	 */
-	fn Push(value: byte)
+	fn Push(value: T)
 
 	/**
-	 * Removes and returns the newest value, or 0x00 when empty.
+	 * Removes and returns the newest value, or zero when empty.
 	 */
-	fn Pop() byte
+	fn Pop() T
 
 	/**
-	 * Returns the newest value without removing it, or 0x00 when empty.
+	 * Returns the newest value without removing it, or zero when empty.
 	 */
-	fn Peek() byte
+	fn Peek() T
 
 	/**
 	 * Returns true when the stack contains no values.

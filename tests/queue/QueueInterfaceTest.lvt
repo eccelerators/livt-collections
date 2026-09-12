@@ -1,0 +1,63 @@
+namespace Livt.Collections.Tests
+
+using Livt.Collections
+
+/**
+ * Verifies the same scheduled contract through generic interface references.
+ */
+@Test
+component QueueInterfaceTest
+{
+	bytes: IQueue<byte>
+	numbers: IQueue<int>
+
+	/**
+	 * Binds an inherited byte specialization and a generic integer queue.
+	 */
+	new()
+	{
+		this.bytes = new Queue8()
+		this.numbers = new Queue<int, 3>()
+	}
+
+	/**
+	 * Checks inherited interface dispatch and the output-parameter result.
+	 */
+	@Test
+	fn TestNamedByteQueue()
+	{
+		this.bytes.Clear()
+		assert this.bytes.GetSpace() == 8
+		assert this.bytes.TryEnqueue(0x00) == true
+		assert this.bytes.GetCount() == 1
+		var value: byte = 0xFF
+		assert this.bytes.TryDequeue(value) == true
+		assert value == 0x00
+		assert this.bytes.TryDequeue(value) == false
+		assert value == 0x00
+	}
+
+	/**
+	 * Checks payload specialization, full rejection and ordered draining.
+	 */
+	@Test
+	fn TestGenericIntegerQueue()
+	{
+		this.numbers.Clear()
+		assert this.numbers.TryEnqueue(-123) == true
+		assert this.numbers.TryEnqueue(0) == true
+		assert this.numbers.TryEnqueue(456) == true
+		assert this.numbers.TryEnqueue(999) == false
+		assert this.numbers.GetCount() == 3
+		assert this.numbers.GetSpace() == 0
+		var value: int
+		assert this.numbers.TryDequeue(value) == true
+		assert value == -123
+		assert this.numbers.TryDequeue(value) == true
+		assert value == 0
+		assert this.numbers.TryDequeue(value) == true
+		assert value == 456
+		assert this.numbers.TryDequeue(value) == false
+		assert value == 0
+	}
+}

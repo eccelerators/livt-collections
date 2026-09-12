@@ -1,0 +1,6 @@
+namespace Livt.Collections.List
+
+/**
+ * Byte list with 16 slots backed by the shared generic List implementation.
+ */
+component List16 : List<byte, 16> {}

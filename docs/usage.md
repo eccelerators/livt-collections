@@ -3,28 +3,39 @@
 ## Queue
 
 ```livt
-using Livt.Collections.Queue
+using Livt.Collections
 
 component QueueExample
 {
-	queue: Queue32
+	queue: Queue<byte, 32>
 
 	new()
 	{
-		this.queue = new Queue32()
+		this.queue = new Queue<byte, 32>()
 	}
 
-	public fn Store(value: byte)
+	public fn TryStore(value: byte) bool
 	{
-		if (this.queue.IsFull() == false) {
-			this.queue.Enqueue(value)
-		}
+		return this.queue.TryEnqueue(value)
 	}
 }
 ```
 
-Select `Queue8`, `Queue16`, `Queue32`, or `Queue64` according to the required
-capacity. All four components implement `IQueue` and have identical behavior.
+Use `Queue<T, CAPACITY>` for scheduled application-level access. Capacity is a
+positive compile-time value, defaults to 64, and need not be a power of two.
+`Queue8`, `Queue16`, `Queue32`, and `Queue64` are thin byte specializations
+with the same `IQueue<byte>` contract, not separate storage implementations.
+
+`TryDequeue(value: out T)` returns success and assigns zero on failure. A
+successful zero payload is therefore distinguishable from an empty queue.
+`GetCount()` and `GetSpace()` are snapshots, not reservations: use the Try
+operation's result rather than a separate check followed by a mutation.
+
+For hardware-level producer/consumer wiring, use `Fifo<T, CAPACITY>` directly.
+It accepts requests at a clock edge and can push and pop together. Queue wraps
+that core with scheduled calls and arbitration; it is more convenient for
+application logic but introduces additional control state and call latency.
+Neither component crosses clock domains.
 
 ## Stack
 
@@ -33,14 +44,14 @@ using Livt.Collections.Stack
 
 component StackExample
 {
-	stack: Stack32
+	stack: Stack<int, 12>
 
 	new()
 	{
-		this.stack = new Stack32()
+		this.stack = new Stack<int, 12>()
 	}
 
-	public fn Store(value: byte)
+	public fn Store(value: int)
 	{
 		if (this.stack.IsFull() == false) {
 			this.stack.Push(value)
@@ -49,8 +60,9 @@ component StackExample
 }
 ```
 
-Select `Stack8`, `Stack16`, `Stack32`, or `Stack64` according to the required
-capacity. All four components implement `IStack` and have identical behavior.
+Use `Stack<T, CAPACITY>` for custom element types or capacities. `Stack8`,
+`Stack16`, `Stack32`, and `Stack64` are thin byte specializations implementing
+`IStack<byte>`.
 
 ## Circular Buffer
 
@@ -59,11 +71,11 @@ using Livt.Collections.Circular
 
 component RecentBytes
 {
-	buffer: CircularBuffer16
+	buffer: CircularBuffer<byte, 12>
 
 	new()
 	{
-		this.buffer = new CircularBuffer16()
+		this.buffer = new CircularBuffer<byte, 12>()
 	}
 
 	public fn Record(value: byte)
@@ -74,24 +86,24 @@ component RecentBytes
 ```
 
 Writing to a full circular buffer accepts the new value and discards the oldest
-value. Select `CircularBuffer8`, `CircularBuffer16`, `CircularBuffer32`, or
-`CircularBuffer64` according to the required history length.
+value. Capacity need not be a power of two. The named 8/16/32/64 components are
+thin byte specializations implementing `ICircularBuffer<byte>`.
 
-## Fixed List
+## List
 
 ```livt
 using Livt.Collections.List
 
 component Samples
 {
-	values: FixedList16
+	values: List<int, 12>
 
 	new()
 	{
-		this.values = new FixedList16()
+		this.values = new List<int, 12>()
 	}
 
-	public fn Add(value: byte)
+	public fn Add(value: int)
 	{
 		if (this.values.IsFull() == false) {
 			this.values.Add(value)
@@ -101,7 +113,8 @@ component Samples
 ```
 
 A fixed list maintains a logical count over fixed storage. `Get` and `Set` only
-address elements below the current count.
+address elements below the current count. `List8`, `List16`,
+`List32`, and `List64` remain convenient byte specializations.
 
 ## Bit Set
 

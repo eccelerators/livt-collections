@@ -1,0 +1,6 @@
+namespace Livt.Collections.List
+
+/**
+ * Byte list with 64 slots backed by the shared generic List implementation.
+ */
+component List64 : List<byte, 64> {}

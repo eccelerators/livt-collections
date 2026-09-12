@@ -1,0 +1,73 @@
+namespace Livt.Collections.Tests
+
+using Livt.Collections
+
+/**
+ * Checks clear against a concurrent enqueue without assuming arrival order.
+ */
+@Test
+component QueueClearConcurrencyTest
+{
+	queue: Livt.Collections.Queue<byte, 3>
+	start: bool
+	cleared: bool
+	produced: bool
+
+	/**
+	 * Uses one shared queue for both independently dispatched operations.
+	 */
+	new() { this.queue = new Livt.Collections.Queue<byte, 3>() }
+
+	/**
+	 * Waits until the test has inserted an old value, then clears concurrently.
+	 */
+	process Clearer()
+	{
+		while (!start) { state {} }
+		this.queue.Clear()
+		cleared = true
+
+		state Done { goto Done }
+	}
+
+	/**
+	 * Submits a distinguishable value while clear is pending.
+	 */
+	process Producer()
+	{
+		while (!start) { state {} }
+		assert this.queue.TryEnqueue(0x5A) == true
+		produced = true
+
+		state Done { goto Done }
+	}
+
+	/**
+	 * Clear must remove the old value, and neither request may complete twice.
+	 */
+	@Test
+	fn TestClearAndEnqueue()
+	{
+		assert this.queue.TryEnqueue(0x11) == true
+		start = true
+		Simulation.Wait(500)
+		assert cleared == true
+		assert produced == true
+		var count = this.queue.GetCount()
+		assert count == 0 || count == 1
+		var value: byte
+		var accepted = this.queue.TryDequeue(value)
+
+		if (count == 1) {
+			assert accepted == true
+			assert value == 0x5A
+		} else {
+			assert accepted == false
+			assert value == 0x00
+		}
+
+		assert this.queue.TryDequeue(value) == false
+		assert value == 0x00
+		assert this.queue.GetCount() == 0
+	}
+}

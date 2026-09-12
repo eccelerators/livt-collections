@@ -1,0 +1,142 @@
+namespace Livt.Collections
+
+/**
+ * Application-level FIFO access through scheduled transactions over one Fifo.
+ * Arbitration and completion add control state and latency; use Fifo directly
+ * for cycle-level datapaths. Clear has priority; pending enqueue and dequeue
+ * alternate. Each operation retains its own result.
+ */
+component Queue<T, CAPACITY: int = 64> : IQueue<T>
+{
+	// Signal-level storage core shared by all scheduled operations.
+	fifo: Fifo<T, CAPACITY>
+
+	// Per-operation request/completion toggles used by scheduled callers.
+	enqueueRequest: bool
+	enqueueCompleted: bool
+	dequeueRequest: bool
+	dequeueCompleted: bool
+	clearRequest: bool
+	clearCompleted: bool
+
+	// Payloads and captured results retained until the matching call completes.
+	payload: T
+	enqueueAccepted: bool
+	dequeueAccepted: bool
+	response: T
+
+	// Fairness state and combinational requests presented to the FIFO owner.
+	lastWasEnqueue: bool
+	fifoClear: bool
+	fifoPush: bool
+	fifoPop: bool
+
+	// FIFO acceptance, payload, occupancy, and free-space observations.
+	fifoPushAccepted: bool
+	fifoPopAccepted: bool
+	fifoData: T
+	fifoCount: int
+	fifoSpace: int
+
+	/**
+	 * Creates storage in the inherited single-clock context.
+	 */
+	new()
+	{
+		this.fifo = new Fifo<T, CAPACITY>(
+			this.fifoClear, this.fifoPush, this.payload, this.fifoPop,
+			this.fifoPushAccepted, this.fifoPopAccepted, this.fifoData,
+			this.fifoCount, this.fifoSpace)
+	}
+
+	/**
+	 * Appends a value if space exists at its arbitrated transaction edge.
+	 */
+	override fn TryEnqueue(value: T) bool
+	{
+		payload = value
+		enqueueRequest = !enqueueRequest
+
+		while (enqueueCompleted != enqueueRequest) {
+			state {}
+		}
+
+		return enqueueAccepted
+	}
+
+	/**
+	 * Removes the oldest value; assigns zero and returns false when empty.
+	 */
+	override fn TryDequeue(value: out T) bool
+	{
+		dequeueRequest = !dequeueRequest
+
+		while (dequeueCompleted != dequeueRequest) {
+			state {}
+		}
+
+		value = response
+		return dequeueAccepted
+	}
+
+	/**
+	 * Discards the contents at one edge, ahead of pending transfers.
+	 */
+	override fn Clear()
+	{
+		clearRequest = !clearRequest
+
+		while (clearCompleted != clearRequest) {
+			state {}
+		}
+	}
+
+	/**
+	 * Returns an occupancy snapshot, not a reservation.
+	 */
+	override fn GetCount() int
+	{
+		return fifoCount
+	}
+
+	/**
+	 * Returns a free-space snapshot, not a reservation.
+	 */
+	override fn GetSpace() int
+	{
+		return fifoSpace
+	}
+
+	/**
+	 * Chooses exactly one pending operation without a scheduled helper call.
+	 */
+	process Drive[]()
+	{
+		fifoClear = clearRequest != clearCompleted
+		fifoPush = !fifoClear && enqueueRequest != enqueueCompleted && (dequeueRequest == dequeueCompleted || !lastWasEnqueue)
+		fifoPop = !fifoClear && dequeueRequest != dequeueCompleted && !fifoPush
+	}
+
+	/**
+	 * Captures each result on the FIFO edge; other callers cannot overwrite it.
+	 */
+	process Complete()
+	{
+		state Tick {
+			if (fifoClear) {
+				clearCompleted = clearRequest
+			} elif (fifoPush) {
+				enqueueAccepted = fifoPushAccepted
+				enqueueCompleted = enqueueRequest
+				lastWasEnqueue = true
+			} elif (fifoPop) {
+				dequeueAccepted = fifoPopAccepted
+				response = fifoData
+				dequeueCompleted = dequeueRequest
+				lastWasEnqueue = false
+			}
+
+			goto Tick
+		}
+	}
+}

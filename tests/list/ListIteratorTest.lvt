@@ -3,17 +3,17 @@ namespace Livt.Collections.Tests.List
 using Livt.Collections.List
 
 @Test
-component FixedListIteratorTest
+component ListIteratorTest
 {
-	values: FixedList8
-	first: FixedListIterator<FixedList8>
-	second: FixedListIterator<FixedList8>
+	values: IList<byte>
+	first: ListIterator<byte>
+	second: ListIterator<byte>
 
 	new()
 	{
-		this.values = new FixedList8()
-		this.first = new FixedListIterator<FixedList8>(this.values)
-		this.second = new FixedListIterator<FixedList8>(this.values)
+		this.values = new List8()
+		this.first = new ListIterator<byte>(this.values)
+		this.second = new ListIterator<byte>(this.values)
 	}
 
 	@Test
@@ -26,11 +26,12 @@ component FixedListIteratorTest
 		this.first.Reset()
 		this.second.Reset()
 		var sum = 0
-		while (this.first.HasNext())
-		{
+
+		while (this.first.HasNext()) {
 			var value = this.first.Next()
 			sum += value as int
 		}
+
 		assert sum == 6
 		var next = this.second.Next()
 		assert next == 0x01

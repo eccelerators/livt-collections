@@ -1,0 +1,102 @@
+namespace Livt.Collections.List
+
+/**
+ * Indexed fixed-capacity storage selected by element type and compile-time size.
+ * Only indices below the logical size are observable or writable.
+ */
+component List<T, CAPACITY: int = 64> : IList<T>
+{
+	static assert CAPACITY > 0, "List capacity must be positive"
+
+	// Capacity-derived logical occupancy width.
+	const COUNT_BITS: int = Bits.RequiredFor(CAPACITY)
+
+	// Backing cells retain inactive values across Clear; count defines validity.
+	@UninitializedStorage
+	storage: T[CAPACITY]
+
+	// Logical occupancy and the value returned by invalid or empty reads.
+	count: logic[COUNT_BITS]
+	zero: T
+
+	/**
+	 * Appends a value when capacity is available.
+	 */
+	override fn Add(value: T)
+	{
+		if ((this.count as uint) < (CAPACITY as uint)) {
+			this.storage[this.count as uint] = value
+			this.count = ((this.count as uint) + 1) as logic[COUNT_BITS]
+		}
+	}
+
+	/**
+	 * Returns the value at index, or zero when index is outside the logical list.
+	 */
+	override fn Get(index: int) T
+	{
+		if (index < 0) { return this.zero }
+
+		if (index >= ((this.count as uint) as int)) { return this.zero }
+
+		return this.storage[index]
+	}
+
+	/**
+	 * Replaces an existing value; indices outside the logical list are ignored.
+	 */
+	override fn Set(index: int, value: T)
+	{
+		if (index < 0) { return }
+
+		if (index >= ((this.count as uint) as int)) { return }
+
+		this.storage[index] = value
+	}
+
+	/**
+	 * Removes and returns the final value, or zero when empty.
+	 */
+	override fn RemoveLast() T
+	{
+		if ((this.count as uint) > 0) {
+			var lastIndex = (this.count as uint) - 1
+			this.count = lastIndex as logic[COUNT_BITS]
+			return this.storage[lastIndex]
+		}
+
+		return this.zero
+	}
+
+	/**
+	 * Returns the current logical number of values.
+	 */
+	override fn GetSize() int
+	{
+		return (this.count as uint) as int
+	}
+
+	/**
+	 * Returns true when the list contains no values.
+	 */
+	override fn IsEmpty() bool
+	{
+		return (this.count as uint) == 0
+	}
+
+	/**
+	 * Returns true when the list has reached its configured capacity.
+	 */
+	override fn IsFull() bool
+	{
+		return (this.count as uint) == (CAPACITY as uint)
+	}
+
+	/**
+	 * Resets logical occupancy without erasing inactive storage cells.
+	 */
+	override fn Clear()
+	{
+		this.count = 0
+	}
+}

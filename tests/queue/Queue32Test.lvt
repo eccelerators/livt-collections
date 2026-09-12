@@ -1,73 +1,70 @@
 namespace Livt.Collections.Tests.Queue
 
-using Livt.Collections.Queue
+using Livt.Collections
 
+/**
+ * Verifies inherited construction, capacity and the transaction API.
+ */
 @Test
 component Queue32Test
 {
 	queue: Queue32
 
+	/**
+	 * Creates the fixed-capacity specialization.
+	 */
 	new()
 	{
 		this.queue = new Queue32()
 	}
 
+	/**
+	 * Checks rejection, zero payloads and repeated pointer wrapping.
+	 */
 	@Test
-	fn TestFifoOrderAndPeek()
+	fn TestCapacityAndWrapAround()
 	{
 		this.queue.Clear()
-		this.queue.Enqueue(0b0000_0001)
-		this.queue.Enqueue(0b0000_0010)
-		this.queue.Enqueue(0b0000_0011)
-		assert this.queue.Peek() == 0b0000_0001
-		assert this.queue.GetSize() == 3
-		assert this.queue.Dequeue() == 0b0000_0001
-		assert this.queue.Dequeue() == 0b0000_0010
-		assert this.queue.Dequeue() == 0b0000_0011
-		assert this.queue.IsEmpty() == true
+		var value: byte = 0xFF
+		assert this.queue.TryDequeue(value) == false
+		assert value == 0x00
+
+		for (var round = 0; round < 3; round++) {
+			assert this.queue.GetSpace() == 32
+
+			for (var index = 0; index < 32; index++) {
+				assert this.queue.TryEnqueue(index as byte) == true
+			}
+
+			assert this.queue.GetCount() == 32
+			assert this.queue.GetSpace() == 0
+			assert this.queue.TryEnqueue(0xFF) == false
+
+			for (var index = 0; index < 32; index++) {
+				assert this.queue.TryDequeue(value) == true
+				assert value == index as byte
+			}
+
+			assert this.queue.GetCount() == 0
+		}
 	}
 
+	/**
+	 * Checks that clear discards contents and permits reuse.
+	 */
 	@Test
-	fn TestFullQueueRejectsAdditionalElement()
+	fn TestClearAndReuse()
 	{
 		this.queue.Clear()
-
-		for (var i = 0; i < 32; i++) {
-			this.queue.Enqueue(0b0000_0001)
-		}
-
-		this.queue.Enqueue(0b0000_0010)
-		assert this.queue.IsFull() == true
-		assert this.queue.GetSize() == 32
-
-		for (var i = 0; i < 32; i++) {
-			assert this.queue.Dequeue() == 0b0000_0001
-		}
-	}
-
-	@Test
-	fn TestWrapAround()
-	{
+		assert this.queue.TryEnqueue(0xA5) == true
 		this.queue.Clear()
-
-		for (var i = 0; i < 32; i++) {
-			this.queue.Enqueue(0b0000_0001)
-		}
-
-		for (var i = 0; i < 16; i++) {
-			this.queue.Dequeue()
-		}
-
-		for (var i = 0; i < 16; i++) {
-			this.queue.Enqueue(0b0000_0010)
-		}
-
-		for (var i = 0; i < 16; i++) {
-			assert this.queue.Dequeue() == 0b0000_0001
-		}
-
-		for (var i = 0; i < 16; i++) {
-			assert this.queue.Dequeue() == 0b0000_0010
-		}
+		assert this.queue.GetCount() == 0
+		assert this.queue.GetSpace() == 32
+		var value: byte = 0xFF
+		assert this.queue.TryDequeue(value) == false
+		assert value == 0x00
+		assert this.queue.TryEnqueue(0x00) == true
+		assert this.queue.TryDequeue(value) == true
+		assert value == 0x00
 	}
 }

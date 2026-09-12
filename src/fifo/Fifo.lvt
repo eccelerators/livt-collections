@@ -1,0 +1,137 @@
+namespace Livt.Collections
+
+/**
+ * Hardware-level single-clock FIFO for cycle-sensitive producer/consumer wiring.
+ * Requests and combinational acceptance are sampled together on the clock edge.
+ * Pop data is the old head; an empty FIFO does not bypass. Use Queue for
+ * convenient application-level scheduled transactions over this storage core.
+ */
+component Fifo<T, CAPACITY: int = 64>
+{
+	static assert CAPACITY > 0, "FIFO capacity must be positive"
+
+	// Capacity-derived ring-address and logical occupancy widths.
+	const ADDRESS_BITS: int = Bits.RequiredFor(CAPACITY - 1)
+	const COUNT_BITS: int = Bits.RequiredFor(CAPACITY)
+
+	// Transfer requests sampled together at the active clock edge.
+	clear: bool
+	push: bool
+	pushData: T
+	pop: bool
+
+	// Combinational pre-edge acceptance, data, and occupancy observations.
+	public pushAccepted: out bool
+	public popAccepted: out bool
+	public popData: out T
+	public count: out int
+	public space: out int
+
+	// Reset-free payload storage and narrow owner state.
+	@UninitializedStorage
+	storage: T[CAPACITY]
+	head: logic[ADDRESS_BITS]
+	tail: logic[ADDRESS_BITS]
+	used: logic[COUNT_BITS]
+
+	// Cached head avoids a second process reading storage; zero serves empty reads.
+	front: T
+	zero: T
+
+	/**
+	 * Creates empty storage in the inherited clock/reset context.
+	 */
+	new(clear: bool, push: bool, pushData: T, pop: bool,
+		pushAccepted: out bool, popAccepted: out bool, popData: out T,
+		count: out int, space: out int)
+	{
+		this.clear = clear
+		this.push = push
+		this.pushData = pushData
+		this.pop = pop
+		pushAccepted = this.pushAccepted
+		popAccepted = this.popAccepted
+		popData = this.popData
+		count = this.count
+		space = this.space
+	}
+
+	/**
+	 * Reports transactions accepted at the next edge and the pre-edge head.
+	 */
+	process Status[]()
+	{
+		this.count = (this.used as uint) as int
+		this.space = CAPACITY - ((this.used as uint) as int)
+		this.popAccepted = this.context.rst == 0b0 && !this.clear && this.pop && (this.used as uint) > 0
+		this.pushAccepted = this.context.rst == 0b0 && !this.clear && this.push && ((this.used as uint) < (CAPACITY as uint) || (this.pop && (this.used as uint) > 0))
+		this.popData = this.zero
+
+		if ((this.used as uint) > 0) {
+			this.popData = this.front
+		}
+	}
+
+	/**
+	 * Owns all queue mutation. Clear suppresses transfers without clearing cells.
+	 */
+	process Update()
+	{
+		state Tick {
+			var take = pop && (used as uint) > 0
+			var put = push && ((used as uint) < (CAPACITY as uint) || take)
+
+			if (clear) {
+				head = 0
+				tail = 0
+				used = 0
+			} else {
+				if (take) {
+					if ((used as uint) > 1) {
+						if ((head as uint) == ((CAPACITY - 1) as uint)) {
+							front = storage[0]
+						} else {
+							front = storage[(head as uint) + 1]
+						}
+					} elif (put) {
+						// Replacing the sole entry (also the capacity-one full case)
+						// exposes the newly accepted word after this edge.
+						front = pushData
+					}
+
+					static if (CAPACITY > 1) {
+						if ((head as uint) == ((CAPACITY - 1) as uint)) {
+							head = 0
+						} else {
+							head = ((head as uint) + 1) as logic[ADDRESS_BITS]
+						}
+					}
+				}
+
+				if (put) {
+					storage[tail as uint] = pushData
+
+					// The first word is cached so combinational status never reads the
+					// backing array from a second behavioural process.
+					if (!take && (used as uint) == 0) {
+						front = pushData
+					}
+
+					static if (CAPACITY > 1) {
+						if ((tail as uint) == ((CAPACITY - 1) as uint)) {
+							tail = 0
+						} else {
+							tail = ((tail as uint) + 1) as logic[ADDRESS_BITS]
+						}
+					}
+				}
+
+				if (put && !take) { used = ((used as uint) + 1) as logic[COUNT_BITS] }
+
+				if (take && !put) { used = ((used as uint) - 1) as logic[COUNT_BITS] }
+			}
+
+			goto Tick
+		}
+	}
+}

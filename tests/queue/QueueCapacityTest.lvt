@@ -1,0 +1,96 @@
+namespace Livt.Collections.Tests
+
+using Livt.Collections
+
+/**
+ * Verifies storage specialization at both boundary capacities and multiple types.
+ */
+@Test
+component QueueCapacityTest
+{
+	single: Livt.Collections.Queue<byte, 1>
+	large: Livt.Collections.Queue<byte, 64>
+	integers: Livt.Collections.Queue<int, 3>
+	flags: Livt.Collections.Queue<bool, 1>
+
+	/**
+	 * Allocates independent queues so the tests do not share content.
+	 */
+	new()
+	{
+		this.single = new Livt.Collections.Queue<byte, 1>()
+		this.large = new Livt.Collections.Queue<byte, 64>()
+		this.integers = new Livt.Collections.Queue<int, 3>()
+		this.flags = new Livt.Collections.Queue<bool, 1>()
+	}
+
+	/**
+	 * Capacity one wraps on every transfer and rejects both empty and full access.
+	 */
+	@Test
+	fn TestCapacityOne()
+	{
+		this.single.Clear()
+		var value: byte
+
+		for (var index = 0; index < 4; index++) {
+			assert this.single.TryEnqueue(index as byte) == true
+			assert this.single.TryEnqueue(0xFF) == false
+			assert this.single.GetCount() == 1
+			assert this.single.GetSpace() == 0
+			assert this.single.TryDequeue(value) == true
+			assert value == index as byte
+			assert this.single.TryDequeue(value) == false
+			assert value == 0x00
+		}
+	}
+
+	/**
+	 * Fills all 64 cells and checks ordered draining and full rejection.
+	 */
+	@Test
+	fn TestCapacity64()
+	{
+		this.large.Clear()
+
+		for (var index = 0; index < 64; index++) {
+			assert this.large.TryEnqueue(index as byte) == true
+		}
+
+		assert this.large.GetCount() == 64
+		assert this.large.GetSpace() == 0
+		assert this.large.TryEnqueue(0xFF) == false
+		var value: byte
+
+		for (var index = 0; index < 64; index++) {
+			assert this.large.TryDequeue(value) == true
+			assert value == index as byte
+		}
+
+		assert this.large.GetCount() == 0
+		assert this.large.GetSpace() == 64
+	}
+
+	/**
+	 * Checks non-byte payloads and logical clear without storage initialization.
+	 */
+	@Test
+	fn TestPayloadTypesAndClear()
+	{
+		this.integers.Clear()
+		assert this.integers.TryEnqueue(-123) == true
+		var number: int
+		assert this.integers.TryDequeue(number) == true
+		assert number == -123
+		assert this.integers.TryEnqueue(456) == true
+		this.integers.Clear()
+		assert this.integers.TryDequeue(number) == false
+		assert number == 0
+		assert this.flags.TryEnqueue(true) == true
+		var flag: bool
+		assert this.flags.TryDequeue(flag) == true
+		assert flag == true
+		assert this.flags.TryDequeue(flag) == false
+		assert flag == false
+	}
+}

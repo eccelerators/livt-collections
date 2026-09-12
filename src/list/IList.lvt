@@ -1,32 +1,32 @@
 namespace Livt.Collections.List
 
 /**
- * Contract for a byte list with fixed storage and a variable logical size.
+ * Contract for a typed list with fixed storage and a variable logical size.
  *
  * Implementations ignore additions while full and reject indices outside the
- * logical size. Invalid and empty reads return 0x00.
+ * logical size. Invalid and empty reads return the element type's zero value.
  */
-interface IFixedList
+interface IList<T>
 {
 	/**
 	 * Appends a value when capacity is available.
 	 */
-	fn Add(value: byte)
+	fn Add(value: T)
 
 	/**
-	 * Returns the value at index, or 0x00 when index is invalid.
+	 * Returns the value at index, or zero when index is invalid.
 	 */
-	fn Get(index: int) byte
+	fn Get(index: int) T
 
 	/**
 	 * Replaces an existing value; invalid indices are ignored.
 	 */
-	fn Set(index: int, value: byte)
+	fn Set(index: int, value: T)
 
 	/**
-	 * Removes and returns the final value, or 0x00 when empty.
+	 * Removes and returns the final value, or zero when empty.
 	 */
-	fn RemoveLast() byte
+	fn RemoveLast() T
 
 	/**
 	 * Returns the current logical number of values.
