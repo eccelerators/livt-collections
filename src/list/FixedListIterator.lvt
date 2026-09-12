@@ -1,0 +1,38 @@
+namespace Livt.Collections.List
+
+using Livt.Lang
+
+/**
+ * A caller-owned cursor over an existing byte list; list storage is not copied.
+ * The list must remain unchanged during traversal. Separate cursors have
+ * independent positions but do not provide synchronization for list mutation.
+ */
+component FixedListIterator<TSource : IFixedList> : IResettableIterator<byte>
+{
+	source: TSource
+	position: int
+
+	new(source: TSource)
+	{
+		this.source = source
+		this.position = 0
+	}
+
+	override fn Reset()
+	{
+		this.position = 0
+	}
+
+	override fn HasNext() bool
+	{
+		return this.position < this.source.GetSize()
+	}
+
+	override fn Next() byte
+	{
+		assert this.position < this.source.GetSize(), "List iterator is exhausted"
+		var value = this.source.Get(this.position)
+		this.position++
+		return value
+	}
+}

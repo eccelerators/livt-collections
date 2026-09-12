@@ -1,0 +1,43 @@
+namespace Livt.Collections.Tests.List
+
+using Livt.Collections.List
+
+@Test
+component FixedListIteratorTest
+{
+	values: FixedList8
+	first: FixedListIterator<FixedList8>
+	second: FixedListIterator<FixedList8>
+
+	new()
+	{
+		this.values = new FixedList8()
+		this.first = new FixedListIterator<FixedList8>(this.values)
+		this.second = new FixedListIterator<FixedList8>(this.values)
+	}
+
+	@Test
+	fn IndependentCursors()
+	{
+		this.values.Clear()
+		this.values.Add(0x01)
+		this.values.Add(0x02)
+		this.values.Add(0x03)
+		this.first.Reset()
+		this.second.Reset()
+		var sum = 0
+		while (this.first.HasNext())
+		{
+			var value = this.first.Next()
+			sum += value as int
+		}
+		assert sum == 6
+		var next = this.second.Next()
+		assert next == 0x01
+		var size = this.values.GetSize()
+		assert size == 3
+		this.first.Reset()
+		var repeated = this.first.Next()
+		assert repeated == 0x01
+	}
+}

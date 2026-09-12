@@ -132,6 +132,25 @@ Invalid reads and empty `RemoveLast()` calls return `0x00`. Invalid
 writes and additions to a full list are ignored. Indexed insertion and removal
 are intentionally omitted because they require shifting stored elements.
 
+### List iteration
+
+`FixedListIterator<TSource : IFixedList>` implements the core
+`IResettableIterator<byte>` contract. Declare a cursor beside the list and bind
+it in the constructor, for example
+`new FixedListIterator<FixedList8>(this.values)`.
+
+The cursor borrows list storage and owns only its position. `HasNext()` checks
+the logical list size; `Next()` returns the current byte and advances without
+removing it. Call `Next()` only when `HasNext()` is true. `Reset()` rewinds
+without changing the list. Two cursors can have independent positions, but
+access to shared list hardware must still be serialized. Do not mutate the
+list during a traversal.
+
+Use the cursor directly with `foreach` or the `Iteration.Fold`, `Any`, `All`,
+`CountWhere`, and `FindIndex` algorithms from `Livt.Base`. Both consume its
+current position without an implicit reset. Algorithms live in `Livt.Base`;
+this adapter adds no package dependency to `Livt.Collections`.
+
 ### Bit Set
 
 - `Set(index)`, `Clear(index)`, and `Toggle(index)` modify one flag.
