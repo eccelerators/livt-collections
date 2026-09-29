@@ -74,7 +74,9 @@ component CircularBuffer<T, CAPACITY: int = 64> : ICircularBuffer<T>
 	 */
 	override fn Peek() T
 	{
-		if ((this.size as uint) > 0) { return this.storage[this.head as uint] }
+		if ((this.size as uint) > 0) {
+			return this.storage[this.head as uint]
+		}
 
 		return this.zero
 	}

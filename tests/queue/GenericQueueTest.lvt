@@ -8,6 +8,7 @@ using Livt.Collections
 @Test
 component GenericQueueTest
 {
+	// Shared fixture instances, signals, and observation state.
 	queue: Livt.Collections.Queue<byte, 3>
 
 	/**

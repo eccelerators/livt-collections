@@ -8,6 +8,7 @@ using Livt.Collections
 @Test
 component Queue32Test
 {
+	// Shared fixture instances, signals, and observation state.
 	queue: Queue32
 
 	/**
@@ -19,7 +20,7 @@ component Queue32Test
 	}
 
 	/**
-	 * Checks rejection, zero payloads and repeated pointer wrapping.
+	 * Checks the capacity and wrap around case.
 	 */
 	@Test
 	fn TestCapacityAndWrapAround()
@@ -50,7 +51,7 @@ component Queue32Test
 	}
 
 	/**
-	 * Checks that clear discards contents and permits reuse.
+	 * Checks that clearing the queue permits another enqueue/dequeue sequence.
 	 */
 	@Test
 	fn TestClearAndReuse()

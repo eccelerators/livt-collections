@@ -30,6 +30,8 @@ component Fifo<T, CAPACITY: int = 64>
 	// Reset-free payload storage and narrow owner state.
 	@UninitializedStorage
 	storage: T[CAPACITY]
+
+	// Ring positions and logical occupancy within the fixed capacity.
 	head: logic[ADDRESS_BITS]
 	tail: logic[ADDRESS_BITS]
 	used: logic[COUNT_BITS]
@@ -64,7 +66,12 @@ component Fifo<T, CAPACITY: int = 64>
 		this.count = (this.used as uint) as int
 		this.space = CAPACITY - ((this.used as uint) as int)
 		this.popAccepted = this.context.rst == 0b0 && !this.clear && this.pop && (this.used as uint) > 0
-		this.pushAccepted = this.context.rst == 0b0 && !this.clear && this.push && ((this.used as uint) < (CAPACITY as uint) || (this.pop && (this.used as uint) > 0))
+		this.pushAccepted = this.context.rst == 0b0 &&
+			!this.clear &&
+			this.push &&
+			((this.used as uint) < (CAPACITY as uint) ||
+			(this.pop &&
+			(this.used as uint) > 0))
 		this.popData = this.zero
 
 		if ((this.used as uint) > 0) {
@@ -126,9 +133,13 @@ component Fifo<T, CAPACITY: int = 64>
 					}
 				}
 
-				if (put && !take) { used = ((used as uint) + 1) as logic[COUNT_BITS] }
+				if (put && !take) {
+					used = ((used as uint) + 1) as logic[COUNT_BITS]
+				}
 
-				if (take && !put) { used = ((used as uint) - 1) as logic[COUNT_BITS] }
+				if (take && !put) {
+					used = ((used as uint) - 1) as logic[COUNT_BITS]
+				}
 			}
 
 			goto Tick

@@ -3,4 +3,6 @@ namespace Livt.Collections.List
 /**
  * Byte list with 32 slots backed by the shared generic List implementation.
  */
-component List32 : List<byte, 32> {}
+component List32 : List<byte, 32>
+{
+}

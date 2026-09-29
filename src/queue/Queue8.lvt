@@ -3,4 +3,6 @@ namespace Livt.Collections
 /**
  * Application-level byte queue with 8 slots and the shared Queue contract.
  */
-component Queue8 : Queue<byte, 8> {}
+component Queue8 : Queue<byte, 8>
+{
+}

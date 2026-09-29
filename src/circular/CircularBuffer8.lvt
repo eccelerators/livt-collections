@@ -3,4 +3,6 @@ namespace Livt.Collections.Circular
 /**
  * Byte ring with eight slots backed by the shared generic CircularBuffer.
  */
-component CircularBuffer8 : CircularBuffer<byte, 8> {}
+component CircularBuffer8 : CircularBuffer<byte, 8>
+{
+}

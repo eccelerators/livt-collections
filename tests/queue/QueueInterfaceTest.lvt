@@ -8,6 +8,7 @@ using Livt.Collections
 @Test
 component QueueInterfaceTest
 {
+	// Shared fixture instances, signals, and observation state.
 	bytes: IQueue<byte>
 	numbers: IQueue<int>
 
@@ -21,7 +22,7 @@ component QueueInterfaceTest
 	}
 
 	/**
-	 * Checks inherited interface dispatch and the output-parameter result.
+	 * Checks the named byte queue case.
 	 */
 	@Test
 	fn TestNamedByteQueue()
@@ -38,7 +39,7 @@ component QueueInterfaceTest
 	}
 
 	/**
-	 * Checks payload specialization, full rejection and ordered draining.
+	 * Checks the generic integer queue case.
 	 */
 	@Test
 	fn TestGenericIntegerQueue()

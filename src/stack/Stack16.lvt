@@ -3,4 +3,6 @@ namespace Livt.Collections.Stack
 /**
  * Byte stack with 16 slots backed by the shared generic Stack.
  */
-component Stack16 : Stack<byte, 16> {}
+component Stack16 : Stack<byte, 16>
+{
+}

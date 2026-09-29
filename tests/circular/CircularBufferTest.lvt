@@ -2,17 +2,30 @@ namespace Livt.Collections.Tests.Circular
 
 using Livt.Collections.Circular
 
+/**
+ * Exercises CircularBuffer with a shared fixture instance. Each scenario establishes the
+ * inputs and state it needs.
+ */
 @Test
 component CircularBufferTest
 {
+	// Shared fixture instances, signals, and observation state.
 	buffer8: CircularBuffer8
 
+	// Shared fixture instances, signals, and observation state.
 	buffer16: CircularBuffer16
 
+	// Shared fixture instances, signals, and observation state.
 	buffer32: CircularBuffer32
 
+	// Shared fixture instances, signals, and observation state.
 	buffer64: CircularBuffer64
 
+	/**
+	 * Creates the shared fixture instances (CircularBuffer8, CircularBuffer16,
+	 * CircularBuffer32, CircularBuffer64). Tests initialize the state required by their
+	 * scenario.
+	 */
 	new()
 	{
 		this.buffer8 = new CircularBuffer8()
@@ -21,6 +34,9 @@ component CircularBufferTest
 		this.buffer64 = new CircularBuffer64()
 	}
 
+	/**
+	 * Checks the buffer8 overwrites oldest case.
+	 */
 	@Test
 	fn TestBuffer8OverwritesOldest()
 	{
@@ -37,6 +53,9 @@ component CircularBufferTest
 		assert this.buffer8.Read() == 0b0000_0010
 	}
 
+	/**
+	 * Checks the buffer16 capacity case.
+	 */
 	@Test
 	fn TestBuffer16Capacity()
 	{
@@ -52,6 +71,9 @@ component CircularBufferTest
 		assert this.buffer16.Read() == 0b0000_0001
 	}
 
+	/**
+	 * Checks the buffer32 wrap around case.
+	 */
 	@Test
 	fn TestBuffer32WrapAround()
 	{
@@ -80,6 +102,9 @@ component CircularBufferTest
 		assert this.buffer32.IsEmpty() == true
 	}
 
+	/**
+	 * Checks the buffer64 fifo and overwrite case.
+	 */
 	@Test
 	fn TestBuffer64FifoAndOverwrite()
 	{
@@ -100,6 +125,9 @@ component CircularBufferTest
 		assert this.buffer64.Read() == 0b0000_0011
 	}
 
+	/**
+	 * Checks the empty read peek and clear case.
+	 */
 	@Test
 	fn TestEmptyReadPeekAndClear()
 	{

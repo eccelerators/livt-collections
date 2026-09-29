@@ -8,6 +8,7 @@ using Livt.Collections
 @Test
 component ConcurrentQueueTest
 {
+	// Shared fixture instances, signals, and observation state.
 	queue: Livt.Collections.Queue<byte, 3>
 	firstDone: bool
 	secondDone: bool
@@ -29,6 +30,7 @@ component ConcurrentQueueTest
 		state Start {
 			for (var index = 0; index < 8; index++) {
 				var accepted = false
+
 				while (!accepted) {
 					accepted = this.queue.TryEnqueue((index + 1) as byte)
 				}
@@ -38,7 +40,9 @@ component ConcurrentQueueTest
 			goto Done
 		}
 
-		state Done { goto Done }
+		state Done {
+			goto Done
+		}
 	}
 
 	/**
@@ -49,6 +53,7 @@ component ConcurrentQueueTest
 		state Start {
 			for (var index = 0; index < 8; index++) {
 				var accepted = false
+
 				while (!accepted) {
 					accepted = this.queue.TryEnqueue((index + 129) as byte)
 				}
@@ -58,7 +63,9 @@ component ConcurrentQueueTest
 			goto Done
 		}
 
-		state Done { goto Done }
+		state Done {
+			goto Done
+		}
 	}
 
 	/**
@@ -93,7 +100,9 @@ component ConcurrentQueueTest
 			goto Done
 		}
 
-		state Done { goto Done }
+		state Done {
+			goto Done
+		}
 	}
 
 	/**

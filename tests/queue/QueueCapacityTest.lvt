@@ -8,6 +8,7 @@ using Livt.Collections
 @Test
 component QueueCapacityTest
 {
+	// Shared fixture instances, signals, and observation state.
 	single: Livt.Collections.Queue<byte, 1>
 	large: Livt.Collections.Queue<byte, 64>
 	integers: Livt.Collections.Queue<int, 3>
@@ -72,7 +73,7 @@ component QueueCapacityTest
 	}
 
 	/**
-	 * Checks non-byte payloads and logical clear without storage initialization.
+	 * Checks the payload types and clear case.
 	 */
 	@Test
 	fn TestPayloadTypesAndClear()

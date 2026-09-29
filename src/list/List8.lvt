@@ -3,4 +3,6 @@ namespace Livt.Collections.List
 /**
  * Byte list with eight slots backed by the shared generic List implementation.
  */
-component List8 : List<byte, 8> {}
+component List8 : List<byte, 8>
+{
+}

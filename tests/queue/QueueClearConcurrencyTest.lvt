@@ -8,6 +8,7 @@ using Livt.Collections
 @Test
 component QueueClearConcurrencyTest
 {
+	// Shared fixture instances, signals, and observation state.
 	queue: Livt.Collections.Queue<byte, 3>
 	start: bool
 	cleared: bool
@@ -16,18 +17,27 @@ component QueueClearConcurrencyTest
 	/**
 	 * Uses one shared queue for both independently dispatched operations.
 	 */
-	new() { this.queue = new Livt.Collections.Queue<byte, 3>() }
+	new()
+	{
+		this.queue = new Livt.Collections.Queue<byte, 3>()
+	}
 
 	/**
 	 * Waits until the test has inserted an old value, then clears concurrently.
 	 */
 	process Clearer()
 	{
-		while (!start) { state {} }
+		while (!start) {
+			state {
+			}
+		}
+
 		this.queue.Clear()
 		cleared = true
 
-		state Done { goto Done }
+		state Done {
+			goto Done
+		}
 	}
 
 	/**
@@ -35,11 +45,17 @@ component QueueClearConcurrencyTest
 	 */
 	process Producer()
 	{
-		while (!start) { state {} }
+		while (!start) {
+			state {
+			}
+		}
+
 		assert this.queue.TryEnqueue(0x5A) == true
 		produced = true
 
-		state Done { goto Done }
+		state Done {
+			goto Done
+		}
 	}
 
 	/**

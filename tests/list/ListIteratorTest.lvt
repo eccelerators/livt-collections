@@ -2,13 +2,22 @@ namespace Livt.Collections.Tests.List
 
 using Livt.Collections.List
 
+/**
+ * Exercises ListIterator with a shared fixture instance. Each scenario establishes the
+ * inputs and state it needs.
+ */
 @Test
 component ListIteratorTest
 {
+	// Shared fixture instances, signals, and observation state.
 	values: IList<byte>
 	first: ListIterator<byte>
 	second: ListIterator<byte>
 
+	/**
+	 * Creates the shared fixture instances (List8, ListIterator). Tests initialize the state
+	 * required by their scenario.
+	 */
 	new()
 	{
 		this.values = new List8()
@@ -16,6 +25,9 @@ component ListIteratorTest
 		this.second = new ListIterator<byte>(this.values)
 	}
 
+	/**
+	 * Checks the independent cursors case.
+	 */
 	@Test
 	fn IndependentCursors()
 	{
