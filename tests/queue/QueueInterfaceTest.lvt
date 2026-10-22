@@ -18,7 +18,7 @@ component QueueInterfaceTest
 	new()
 	{
 		this.bytes = new Queue8()
-		this.numbers = new Queue<int, 3>()
+		this.numbers = new Livt.Collections.Queue<int, 3>()
 	}
 
 	/**

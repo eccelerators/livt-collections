@@ -1,0 +1,67 @@
+namespace Livt.Collections.Tests
+
+using Livt.Collections
+
+/**
+ * Observes read responses in the read clock domain. Test-only helper.
+ * Clearing resets the scoreboard independently of construction state.
+ */
+component DualClockFifoReadMonitor
+{
+	// Read-domain observation inputs and explicit scoreboard initialization.
+	clear: bool
+	valid: bool
+	data: byte
+
+	// Scoreboard state owned only by Observe.
+	count: uint
+	badData: bool
+
+	/**
+	 * Borrows read-domain signals and binds the observer to their context.
+	 */
+	new(domain: IContext, clear: bool, valid: bool, data: byte)
+	{
+		this.clear = clear
+		this.context = domain
+		this.valid = valid
+		this.data = data
+	}
+
+	/**
+	 * Clears or checks each registered response once per read edge.
+	 */
+	process Observe()
+	{
+		state Tick {
+			if (clear) {
+				this.count = 0
+				this.badData = false
+			} elif (valid) {
+				this.count = count + 1
+
+				if (data != 0xA5) {
+					this.badData = true
+				}
+			}
+
+			goto Tick
+		}
+	}
+
+	/**
+	 * Returns the number of responses observed since the latest clear.
+	 */
+	public fn GetCount() uint
+	{
+		return count
+	}
+
+	/**
+	 * Reports whether any response since clear had an unexpected payload.
+	 */
+	public fn HasBadData() bool
+	{
+		return badData
+	}
+}

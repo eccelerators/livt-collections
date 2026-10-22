@@ -1,0 +1,10 @@
+namespace Livt.Collections
+
+/**
+ * Type-level capacity identity for interchangeable FIFO storage providers.
+ * No instance is needed; matching geometry does not validate provider behavior.
+ */
+component FifoStorageGeometry<CAPACITY: int>
+{
+	static assert CAPACITY >= 2, "FIFO storage capacity must be at least two"
+}

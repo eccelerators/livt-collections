@@ -1,0 +1,82 @@
+namespace Livt.Collections.Tests
+
+using Livt.Collections
+
+/**
+ * Checks two-context wiring, fill/drain and reuse through the Livt test runner.
+ */
+@Test
+@Context(ClockFrequency=25MHz)
+component DualClockFifoTest
+{
+	// Independent read clock borrowed by the FIFO and monitor.
+	@Context(ClockFrequency=50MHz)
+	readContext: IContext
+
+	// Owned subject and read-domain scoreboard.
+	fifo: DualClockFifo<byte, 4>
+	monitor: DualClockFifoReadMonitor
+
+	// Test stimuli held stable across both domains.
+	clearBoth: bool
+	push: bool
+	pop: bool
+
+	/**
+	 * Wires the subject and observer to distinct write/read contexts.
+	 */
+	new()
+	{
+		this.clearBoth = true
+		this.fifo = new DualClockFifo<byte, 4>(this.context, readContext,
+			clearBoth, clearBoth, push, 0xA5, pop)
+		this.monitor = new DualClockFifoReadMonitor(readContext, clearBoth, fifo.popValid, fifo.popData)
+	}
+
+	/**
+	 * Checks fill, drain and reuse after coordinated clear across two clocks.
+	 */
+	@Test
+	fn FillDrainAndReuseAcrossContexts()
+	{
+		this.push = false
+		this.pop = false
+		this.clearBoth = true
+		Simulation.Wait(20)
+		assert fifo.writeCleared
+		assert fifo.readCleared
+		this.clearBoth = false
+		Simulation.Wait(20)
+		this.push = true
+		Simulation.Wait(40)
+		assert fifo.full
+		this.push = false
+		Simulation.Wait(20)
+		this.pop = true
+		Simulation.Wait(60)
+		this.pop = false
+		Simulation.Wait(20)
+		assert fifo.empty
+		var first = sync this.monitor.GetCount()
+		assert first == 4
+		var firstBadData = sync this.monitor.HasBadData()
+		assert !firstBadData
+
+		this.clearBoth = true
+		Simulation.Wait(20)
+		this.clearBoth = false
+		Simulation.Wait(20)
+		this.push = true
+		Simulation.Wait(40)
+		this.push = false
+		Simulation.Wait(20)
+		this.pop = true
+		Simulation.Wait(60)
+		this.pop = false
+		Simulation.Wait(20)
+		var second = sync this.monitor.GetCount()
+		assert second == 4
+		var bad = sync this.monitor.HasBadData()
+		assert !bad
+	}
+}

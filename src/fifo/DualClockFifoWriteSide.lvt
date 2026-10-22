@@ -1,0 +1,85 @@
+namespace Livt.Collections
+
+/**
+ * Internal write-clock owner constructed by DualClockFifo.
+ * Uses its supplied context and coordinated local clear; not an application API.
+ */
+component DualClockFifoWriteSide<T, CAPACITY: int>
+{
+	// Address and wrap-bit widths for power-of-two storage.
+	const ADDRESS_BITS: int = Bits.RequiredFor(CAPACITY - 1)
+	const POINTER_BITS: int = ADDRESS_BITS + 1
+
+	// Constructor-bound requests and remote pointer/storage signals.
+	flush: bool
+	push: bool
+	remote: logic[POINTER_BITS]
+
+	// Signal-level pointer: scheduled accessors would add an address cycle.
+	public address: out logic[ADDRESS_BITS]
+	public binary: out logic[POINTER_BITS]
+	public gray: out logic[POINTER_BITS]
+
+	// Destination-clock samples of the remote Gray pointer.
+	stage1: logic[POINTER_BITS]
+	stage2: logic[POINTER_BITS]
+
+	// Local clear state and transfer status.
+	clearSeen: bool
+	public cleared: out bool
+	public accepted: out bool
+	public full: out bool
+
+	/**
+	 * Binds the supplied clock/reset context and live input signals.
+	 * The caller must coordinate reset/clear in both domains before traffic.
+	 */
+	new(domain: IContext, flush: bool, push: bool, remote: logic[POINTER_BITS])
+	{
+		this.context = domain
+		this.flush = flush
+		this.push = push
+		this.remote = remote
+	}
+
+	/**
+	 * Computes local status without adding clocked accessor latency.
+	 */
+	process Status[]()
+	{
+		this.address = (binary as uint) as logic[ADDRESS_BITS]
+		this.cleared = clearSeen
+		this.full = gray == ((stage2 as uint) ^ ((3 as uint) << (ADDRESS_BITS - 1))) as logic[POINTER_BITS]
+		this.accepted = !flush && context.rst == 0b0 && push && !full
+	}
+
+	/**
+	 * Advances local state once per clock edge; preserves two synchronizer stages.
+	 */
+	process Update()
+	{
+		state Tick {
+			if (flush) {
+				this.clearSeen = true
+				this.binary = 0
+				this.gray = 0
+				this.stage1 = 0
+				this.stage2 = 0
+			} else {
+				this.clearSeen = false
+				// Preserve the prior sample: sequential Livt assignments forward values.
+				var previous = stage1
+				this.stage1 = remote
+				this.stage2 = previous
+
+				if (accepted) {
+					var next = ((binary as uint) + 1) & (((2 * CAPACITY) - 1) as uint)
+					this.binary = next as logic[POINTER_BITS]
+					this.gray = (next ^ (next >> 1)) as logic[POINTER_BITS]
+				}
+			}
+
+			goto Tick
+		}
+	}
+}

@@ -1,0 +1,98 @@
+namespace Livt.Collections
+
+/**
+ * Internal read-clock owner constructed by DualClockFifo.
+ * Uses its supplied context and coordinated local clear; not an application API.
+ */
+component DualClockFifoReadSide<T, CAPACITY: int>
+{
+	// Address and wrap-bit widths for power-of-two storage.
+	const ADDRESS_BITS: int = Bits.RequiredFor(CAPACITY - 1)
+	const POINTER_BITS: int = ADDRESS_BITS + 1
+
+	// Constructor-bound requests and remote pointer/storage signals.
+	flush: bool
+	pop: bool
+	remote: logic[POINTER_BITS]
+	inputData: T
+
+	// Signal-level pointer: scheduled accessors would add an address cycle.
+	public binary: out logic[POINTER_BITS]
+	public gray: out logic[POINTER_BITS]
+	public address: out logic[ADDRESS_BITS]
+
+	// Destination-clock samples of the remote Gray pointer.
+	stage1: logic[POINTER_BITS]
+	stage2: logic[POINTER_BITS]
+
+	// Registered read response, exposed combinationally to avoid accessor latency.
+	response: T
+	responseValid: bool
+	public data: out T
+	public valid: out bool
+
+	// Local clear state and transfer status.
+	clearSeen: bool
+	public cleared: out bool
+	public accepted: out bool
+	public empty: out bool
+
+	/**
+	 * Binds the supplied clock/reset context and live input signals.
+	 * The caller must coordinate reset/clear in both domains before traffic.
+	 */
+	new(domain: IContext, flush: bool, pop: bool, remote: logic[POINTER_BITS], inputData: T)
+	{
+		this.context = domain
+		this.flush = flush
+		this.pop = pop
+		this.remote = remote
+		this.inputData = inputData
+	}
+
+	/**
+	 * Computes local status without adding clocked accessor latency.
+	 */
+	process Status[]()
+	{
+		this.cleared = clearSeen
+		this.data = response
+		this.valid = responseValid && !flush && context.rst == 0b0
+		this.empty = gray == stage2
+		this.address = (binary as uint) as logic[ADDRESS_BITS]
+		this.accepted = !flush && context.rst == 0b0 && pop && !empty
+	}
+
+	/**
+	 * Advances local state once per clock edge; preserves two synchronizer stages.
+	 */
+	process Update()
+	{
+		state Tick {
+			if (flush) {
+				this.clearSeen = true
+				this.binary = 0
+				this.gray = 0
+				this.stage1 = 0
+				this.stage2 = 0
+				this.responseValid = false
+			} else {
+				this.clearSeen = false
+				// Preserve the prior sample: sequential Livt assignments forward values.
+				var previous = stage1
+				this.stage1 = remote
+				this.stage2 = previous
+				this.responseValid = accepted
+
+				if (accepted) {
+					this.response = inputData
+					var next = ((binary as uint) + 1) & (((2 * CAPACITY) - 1) as uint)
+					this.binary = next as logic[POINTER_BITS]
+					this.gray = (next ^ (next >> 1)) as logic[POINTER_BITS]
+				}
+			}
+
+			goto Tick
+		}
+	}
+}

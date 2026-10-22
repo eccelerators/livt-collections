@@ -1,0 +1,42 @@
+namespace Livt.Collections
+
+/**
+ * Reset-free array with one clocked write port and an independent read tap.
+ * Inherits the FIFO's write context. The FIFO owns read-domain registration.
+ * STYLE requests a resource category without changing the read contract.
+ * Auto does not force registers; Block is only a hint, and asynchronous reads
+ * may prevent block-memory inference unless synthesis merges the read register.
+ */
+component DualClockFifoArray<T, CAPACITY: int = 256,
+	STYLE: MemoryStyle = MemoryStyle.Auto>
+	: IFifoStorage<T, FifoStorageGeometry<CAPACITY>>
+{
+	static assert CAPACITY >= 2, "FIFO storage capacity must be at least two"
+
+	// Single-owner payload cells, never reset or initialized as an array.
+	@Memory(Style = STYLE)
+	@UninitializedStorage
+	cells: T[CAPACITY]
+
+	/**
+	 * Exposes the selected element without a scheduled field accessor.
+	 */
+	process ReadPort[]()
+	{
+		this.readData = cells[this.readAddress]
+	}
+
+	/**
+	 * Commits at most one payload per write edge, retaining cells on reset.
+	 */
+	process WritePort()
+	{
+		state Tick {
+			if (this.writeEnable && context.rst == 0b0) {
+				this.cells[this.writeAddress] = this.writeData
+			}
+
+			goto Tick
+		}
+	}
+}

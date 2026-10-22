@@ -140,3 +140,21 @@ component StatusFlags
 `BitSet8` provides eight independently addressable boolean flags, reports its
 fixed size through `GetCapacity()`, and exposes an integer bit-mask view through
 `GetValue()`.
+
+
+## Dual-clock FIFO storage selection
+
+The storage type is optional; constructor arguments and cycle semantics are the
+same for every compatible provider:
+
+```livt
+fifo: DualClockFifo<byte, 64>
+blockFifo: DualClockFifo<byte, 64, DualClockFifoBlockRam<byte, 64>>
+distributedFifo: DualClockFifo<byte, 64, DualClockFifoDistributedRam<byte, 64>>
+```
+
+These are declaration alternatives, not three required instances. The FIFO owns
+the selected provider in its write context and registers reads in its read context.
+Block/distributed types request synthesis styles; they do not guarantee device
+mapping. See [the storage contract and wiring example](fifo-storage.md) and
+[clear/reset coordination](dual-clock-fifo.md).

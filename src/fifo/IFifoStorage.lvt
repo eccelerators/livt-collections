@@ -1,0 +1,23 @@
+namespace Livt.Collections
+
+/**
+ * Single-writer, independent combinational-read storage for FIFO datapaths.
+ * Writes commit at the inherited context's rising edge outside reset.
+ * readData continuously reflects readAddress; there is no read clock or
+ * scheduled transaction. The FIFO registers that value in its read domain.
+ * Payload cells survive reset; unwritten contents are unspecified.
+ * Addresses are valid unsigned element indices in GEOMETRY's capacity.
+ * The consumer prevents simultaneous access to the same cell. The provider
+ * is exclusively owned and must not add stalls or registered read latency.
+ */
+interface IFifoStorage<T, GEOMETRY>
+{
+	// Write-domain command accepted at the rising edge.
+	writeEnable: in bool
+	writeAddress: in uint
+	writeData: in T
+
+	// Independent read tap; registration belongs to the FIFO's read endpoint.
+	readAddress: in uint
+	readData: out T
+}

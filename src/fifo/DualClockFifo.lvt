@@ -1,0 +1,75 @@
+namespace Livt.Collections
+
+/**
+ * Two-clock FIFO owning a compile-time-selected payload store.
+ * Power-of-two CAPACITY >= 2; opaque payload T. Default storage is Auto array.
+ * pushAccepted/popAccepted are pre-edge decisions in their own contexts.
+ * popData/popValid are the registered read response after the accepting edge.
+ * Storage inherits writeContext; the FIFO owns readContext response registration.
+ * Clear both endpoints while traffic is stopped; wait for both cleared flags.
+ * See docs/dual-clock-fifo.md for reset, CDC constraints and read reservation.
+ */
+component DualClockFifo<T, CAPACITY: int = 256,
+	STORAGE: IFifoStorage<T, FifoStorageGeometry<CAPACITY>> & new() = DualClockFifoArray<T, CAPACITY>>
+{
+	static assert CAPACITY >= 2, "DualClockFifo capacity must be at least two"
+	static assert CAPACITY <= 1048576, "DualClockFifo capacity exceeds supported pointer arithmetic"
+	static assert (CAPACITY & (CAPACITY - 1)) == 0, "DualClockFifo capacity must be a power of two"
+
+	// Owned provider; payload and capacity checked by its constraint.
+	storage: STORAGE
+	inputData: T
+	selectedData: T
+
+	// Owned endpoints with independently bound clocks.
+	writeSide: DualClockFifoWriteSide<T, CAPACITY>
+	readSide: DualClockFifoReadSide<T, CAPACITY>
+
+	// Write/read transfer decisions and registered read response.
+	public pushAccepted: out bool
+	public popAccepted: out bool
+	public popValid: out bool
+	public popData: out T
+	public full: out bool
+	public empty: out bool
+
+	// Local clear acknowledgments; callers must coordinate both domains.
+	public writeCleared: out bool
+	public readCleared: out bool
+
+	/**
+	 * Owns selected storage in writeContext and endpoints in both clock contexts.
+	 * The caller must coordinate reset/clear in both domains before traffic.
+	 */
+	new(writeContext: IContext, readContext: IContext,
+		writeClear: bool, readClear: bool, push: bool, data: T, pop: bool)
+	{
+		// Bind storage inheritance to the write context; the read endpoint is explicit.
+		this.context = writeContext
+		this.storage = new STORAGE()
+		this.inputData = data
+		this.writeSide = new DualClockFifoWriteSide<T, CAPACITY>(writeContext, writeClear, push, readSide.gray)
+		this.readSide = new DualClockFifoReadSide<T, CAPACITY>(readContext, readClear, pop,
+			writeSide.gray, selectedData)
+	}
+
+	/**
+	 * Exposes each owned endpoint in its respective clock domain.
+	 */
+	process Wire[]()
+	{
+		this.selectedData = storage.readData
+		this.storage.writeEnable = writeSide.accepted
+		this.storage.writeAddress = writeSide.address as uint
+		this.storage.writeData = inputData
+		this.storage.readAddress = readSide.address as uint
+		this.pushAccepted = writeSide.accepted
+		this.popAccepted = readSide.accepted
+		this.popValid = readSide.valid
+		this.popData = readSide.data
+		this.writeCleared = writeSide.cleared
+		this.readCleared = readSide.cleared
+		this.full = writeSide.full
+		this.empty = readSide.empty
+	}
+}

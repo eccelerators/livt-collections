@@ -26,12 +26,12 @@ component GenericCollectionsTest
 	 */
 	new()
 	{
-		this.stackContract = new Stack<int, 3>()
-		this.listContract = new List<bool, 3>()
+		this.stackContract = new Livt.Collections.Stack.Stack<int, 3>()
+		this.listContract = new Livt.Collections.List.List<bool, 3>()
 		this.bufferContract = new CircularBuffer<int, 3>()
 		this.iterator = new ListIterator<bool>(this.listContract)
-		this.singleStack = new Stack<byte, 1>()
-		this.singleList = new List<byte, 1>()
+		this.singleStack = new Livt.Collections.Stack.Stack<byte, 1>()
+		this.singleList = new Livt.Collections.List.List<byte, 1>()
 		this.singleBuffer = new CircularBuffer<byte, 1>()
 	}
 

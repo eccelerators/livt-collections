@@ -1,0 +1,11 @@
+namespace Livt.Collections
+
+/**
+ * Requests block memory for the portable FIFO payload array.
+ * Preserves its combinational read tap; the synthesis tool decides mapping.
+ * Not a vendor primitive or a promise that MAX 10 implements this resource.
+ */
+component DualClockFifoBlockRam<T, CAPACITY: int = 256>
+	: DualClockFifoArray<T, CAPACITY, MemoryStyle.Block>
+{
+}

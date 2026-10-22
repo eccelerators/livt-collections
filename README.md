@@ -14,8 +14,10 @@ thin inherited aliases and do not retain or duplicate another capacity's memory.
 
 ```toml
 [dependencies]
-Livt.Collections = "1.1.0"
+Livt.Collections = "1.3.0"
 ```
+
+Version 1.3.0 adds `DualClockFifo` with selectable storage backends.
 
 `Livt.Collections` supersedes the standalone Queue, Stack, CircularBuffer, and
 BitSet packages for new applications.
@@ -38,6 +40,7 @@ convenient specializations.
 
 | Contract | Component | Capacity | Behavior when full |
 |---|---|---:|---|
+| Signal-level ports | `DualClockFifo<T, CAPACITY>` | Power of two, 2–1,048,576 | pushAccepted is false |
 | `IQueue<T>` | `Queue<T, CAPACITY>` | CAPACITY values (default 64) | TryEnqueue returns false |
 | `IQueue<byte>` | `Queue8` | 8 bytes | TryEnqueue returns false |
 | `IQueue<byte>` | `Queue16` | 16 bytes | TryEnqueue returns false |
@@ -52,8 +55,9 @@ convenient specializations.
 | `IBitSet` | `BitSet8` | 8 flags | Out-of-range operations are ignored |
 
 The `IQueue<T>`, `IStack<T>`, `ICircularBuffer<T>`, `IList<T>`, and
-`IBitSet` interfaces are storage-free contracts. Generic backing storage declares
+`IBitSet` interfaces are storage-free contracts. Default backing storage declares
 `T[CAPACITY]`; named byte capacities inherit the matching specialization.
+`DualClockFifo` additionally accepts a constrained concrete storage type.
 
 The interfaces contain no storage. Applications may implement a contract with
 another capacity without inheriting unused memory. Using a concrete
@@ -109,6 +113,41 @@ transfers. At full, simultaneous push/pop return the old head and preserve
 count; at empty, only push succeeds (no bypass). Acceptance and head data are
 combinational **pre-edge** signals and must be sampled at the transfer edge.
 See [hardware notes](docs/hardware-notes.md) for the current resource limitations.
+
+### Dual-clock FIFO
+
+Use `DualClockFifo<T, CAPACITY, STORAGE>` to buffer an ordered stream between
+independent clocks—for example, from an externally clocked receiver to a processing
+pipeline. It absorbs temporary differences in producer and consumer rates.
+`STORAGE` defaults to `DualClockFifoArray<T, CAPACITY>`, so existing two-argument
+declarations remain valid. It has domain-local push/pop acceptance, a registered read response, conservative full/empty flags, and separate coordinated-clear inputs/acknowledgments. It is implemented in Livt and tested through generated HDL; it is not a per-item `sync` queue.
+
+Select storage through the third type argument:
+
+```livt
+// Portable array; synthesis chooses the physical resource.
+fifo: DualClockFifo<logic[12], 256>
+
+// Request block-memory style for the same payload and capacity.
+blockFifo: DualClockFifo<logic[12], 256, DualClockFifoBlockRam<logic[12], 256>>
+
+// Request distributed-memory style.
+distributedFifo: DualClockFifo<byte, 16, DualClockFifoDistributedRam<byte, 16>>
+```
+
+The FIFO owns the selected component. Custom providers implement
+`IFifoStorage<T, FifoStorageGeometry<CAPACITY>>` and support `new()`.
+They inherit the write context and expose an independent combinational read tap;
+the FIFO registers the response in the read context. The constraints check type,
+capacity identity and construction, while tests must establish timing behavior.
+
+Block/distributed selections are synthesis hints, not measured mappings.
+In particular, an asynchronous read tap plus a separate read register requires
+synthesis to recognize/merge that structure before it can use suitable block RAM.
+See [storage selection and mapping](docs/fifo-storage.md) for the precise boundary.
+This release does not add storage injection to existing single-clock collections.
+
+See [the dual-clock FIFO contract](docs/dual-clock-fifo.md) for wiring, reset/clear sequencing, consumer response reservation, tests, and physical CDC constraints. MAX 10 timing and block-RAM mapping remain integration work.
 
 ### Hardware-level and application-level access
 
@@ -221,7 +260,8 @@ livt clean
 livt test
 ```
 
-See [`docs/usage.md`](docs/usage.md) for examples.
+See [`docs/usage.md`](docs/usage.md) for examples and
+[`CHANGELOG.md`](CHANGELOG.md) for release changes.
 
 ## 🛠️ Development Notes
 
