@@ -1,41 +1,41 @@
-# Selecting dual-clock FIFO storage
+# Selecting asynchronous FIFO storage
 
-`DualClockFifo<T, CAPACITY, STORAGE>` owns its backing storage. The optional third
+`AsyncFifo<T, CAPACITY, STORAGE>` owns its backing storage. The optional third
 type argument selects the implementation at compile time; omitting it selects
-`DualClockFifoArray<T, CAPACITY>`.
+`AsyncFifoArray<T, CAPACITY>`.
 
 ## Built-in choices
 
 | Storage type | Use |
 | --- | --- |
-| `DualClockFifoArray<T, N>` | Let synthesis choose the memory resource; this is the default |
-| `DualClockFifoBlockRam<T, N>` | Request block-memory storage |
-| `DualClockFifoDistributedRam<T, N>` | Request distributed-memory storage |
+| `AsyncFifoArray<T, N>` | Let synthesis choose the memory resource; this is the default |
+| `AsyncFifoBlockRam<T, N>` | Request block-memory storage |
+| `AsyncFifoDistributedRam<T, N>` | Request distributed-memory storage |
 
 For example, these are alternative declarations for a 256-value buffer:
 
 ```livt
-fifo: DualClockFifo<logic[12], 256>
-blockFifo: DualClockFifo<logic[12], 256, DualClockFifoBlockRam<logic[12], 256>>
-distributedFifo: DualClockFifo<logic[12], 256, DualClockFifoDistributedRam<logic[12], 256>>
+fifo: AsyncFifo<logic[12], 256>
+blockFifo: AsyncFifo<logic[12], 256, AsyncFifoBlockRam<logic[12], 256>>
+distributedFifo: AsyncFifo<logic[12], 256, AsyncFifoDistributedRam<logic[12], 256>>
 ```
 
 Use the selected type in the constructor as well. This fragment belongs inside
 the owning component:
 
 ```livt
-fifo: DualClockFifo<logic[12], 256, DualClockFifoBlockRam<logic[12], 256>>
+fifo: AsyncFifo<logic[12], 256, AsyncFifoBlockRam<logic[12], 256>>
 
 new(writeContext: IContext, readContext: IContext,
 	writeClear: bool, readClear: bool, push: bool, token: logic[12], pop: bool)
 {
-	this.fifo = new DualClockFifo<logic[12], 256, DualClockFifoBlockRam<logic[12], 256>>(
+	this.fifo = new AsyncFifo<logic[12], 256, AsyncFifoBlockRam<logic[12], 256>>(
 		writeContext, readContext, writeClear, readClear, push, token, pop)
 }
 ```
 
 All built-in choices preserve the FIFO's acceptance, response timing and clear
-behavior. They allocate one payload store. See [using the FIFO](dual-clock-fifo.md)
+behavior. They allocate one payload store. See [using the FIFO](async-fifo.md)
 for the transfer and reset protocols.
 
 ## Memory mapping

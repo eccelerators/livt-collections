@@ -14,10 +14,10 @@ thin inherited aliases and do not retain or duplicate another capacity's memory.
 
 ```toml
 [dependencies]
-Livt.Collections = "1.3.0"
+Livt.Collections = "1.4.0"
 ```
 
-Version 1.3.0 adds `DualClockFifo` with selectable storage backends.
+Version 1.4.0 standardizes the asynchronous FIFO API as `AsyncFifo`, with selectable storage backends. Consumers upgrading from 1.3.0 must update the FIFO and storage-provider type names; constructor parameters and hardware behavior are unchanged.
 
 `Livt.Collections` supersedes the standalone Queue, Stack, CircularBuffer, and
 BitSet packages for new applications.
@@ -40,7 +40,7 @@ convenient specializations.
 
 | Contract | Component | Capacity | Behavior when full |
 |---|---|---:|---|
-| Signal-level ports | `DualClockFifo<T, CAPACITY>` | Power of two, 2–1,048,576 | pushAccepted is false |
+| Signal-level ports | `AsyncFifo<T, CAPACITY>` | Power of two, 2–1,048,576 | pushAccepted is false |
 | `IQueue<T>` | `Queue<T, CAPACITY>` | CAPACITY values (default 64) | TryEnqueue returns false |
 | `IQueue<byte>` | `Queue8` | 8 bytes | TryEnqueue returns false |
 | `IQueue<byte>` | `Queue16` | 16 bytes | TryEnqueue returns false |
@@ -57,7 +57,7 @@ convenient specializations.
 The `IQueue<T>`, `IStack<T>`, `ICircularBuffer<T>`, `IList<T>`, and
 `IBitSet` interfaces are storage-free contracts. Default backing storage declares
 `T[CAPACITY]`; named byte capacities inherit the matching specialization.
-`DualClockFifo` additionally accepts a constrained concrete storage type.
+`AsyncFifo` additionally accepts a constrained concrete storage type.
 
 The interfaces contain no storage. Applications may implement a contract with
 another capacity without inheriting unused memory. Using a concrete
@@ -114,25 +114,25 @@ count; at empty, only push succeeds (no bypass). Acceptance and head data are
 combinational **pre-edge** signals and must be sampled at the transfer edge.
 See [hardware notes](docs/hardware-notes.md) for the current resource limitations.
 
-### Dual-clock FIFO
+### Asynchronous FIFO
 
-Use `DualClockFifo<T, CAPACITY, STORAGE>` to buffer an ordered stream between
+Use `AsyncFifo<T, CAPACITY, STORAGE>` to buffer an ordered stream between
 independent clocks—for example, from an externally clocked receiver to a processing
 pipeline. It absorbs temporary differences in producer and consumer rates.
-`STORAGE` defaults to `DualClockFifoArray<T, CAPACITY>`, so existing two-argument
+`STORAGE` defaults to `AsyncFifoArray<T, CAPACITY>`, so existing two-argument
 declarations remain valid. It has domain-local push/pop acceptance, a registered read response, conservative full/empty flags, and separate coordinated-clear inputs/acknowledgments. It is implemented in Livt and tested through generated HDL; it is not a per-item `sync` queue.
 
 Select storage through the third type argument:
 
 ```livt
 // Portable array; synthesis chooses the physical resource.
-fifo: DualClockFifo<logic[12], 256>
+fifo: AsyncFifo<logic[12], 256>
 
 // Request block-memory style for the same payload and capacity.
-blockFifo: DualClockFifo<logic[12], 256, DualClockFifoBlockRam<logic[12], 256>>
+blockFifo: AsyncFifo<logic[12], 256, AsyncFifoBlockRam<logic[12], 256>>
 
 // Request distributed-memory style.
-distributedFifo: DualClockFifo<byte, 16, DualClockFifoDistributedRam<byte, 16>>
+distributedFifo: AsyncFifo<byte, 16, AsyncFifoDistributedRam<byte, 16>>
 ```
 
 The FIFO owns the selected component. Custom providers implement
@@ -147,7 +147,7 @@ synthesis to recognize/merge that structure before it can use suitable block RAM
 See [storage selection and mapping](docs/fifo-storage.md) for the precise boundary.
 This release does not add storage injection to existing single-clock collections.
 
-See [the dual-clock FIFO contract](docs/dual-clock-fifo.md) for wiring, reset/clear sequencing, consumer response reservation, tests, and physical CDC constraints. MAX 10 timing and block-RAM mapping remain integration work.
+See [the asynchronous FIFO contract](docs/async-fifo.md) for wiring, reset/clear sequencing, consumer response reservation, tests, and physical CDC constraints. MAX 10 timing and block-RAM mapping remain integration work.
 
 ### Hardware-level and application-level access
 

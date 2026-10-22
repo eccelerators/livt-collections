@@ -1,13 +1,13 @@
 [project]
 name = "Livt.Collections"
-version = "1.3.0"
+version = "1.4.0"
 path = "src"
 outdir = "out"
 
 [tests]
 path = "tests"
 components = [
-    "DualClockFifoTest",
+    "AsyncFifoTest",
     "GenericCollectionsTest",
     "QueueInterfaceTest",
     "GenericQueueTest",

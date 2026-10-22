@@ -7,14 +7,14 @@ namespace Livt.Collections
  * popData/popValid are the registered read response after the accepting edge.
  * Storage inherits writeContext; the FIFO owns readContext response registration.
  * Clear both endpoints while traffic is stopped; wait for both cleared flags.
- * See docs/dual-clock-fifo.md for reset, CDC constraints and read reservation.
+ * See docs/async-fifo.md for reset, CDC constraints and read reservation.
  */
-component DualClockFifo<T, CAPACITY: int = 256,
-	STORAGE: IFifoStorage<T, FifoStorageGeometry<CAPACITY>> & new() = DualClockFifoArray<T, CAPACITY>>
+component AsyncFifo<T, CAPACITY: int = 256,
+	STORAGE: IFifoStorage<T, FifoStorageGeometry<CAPACITY>> & new() = AsyncFifoArray<T, CAPACITY>>
 {
-	static assert CAPACITY >= 2, "DualClockFifo capacity must be at least two"
-	static assert CAPACITY <= 1048576, "DualClockFifo capacity exceeds supported pointer arithmetic"
-	static assert (CAPACITY & (CAPACITY - 1)) == 0, "DualClockFifo capacity must be a power of two"
+	static assert CAPACITY >= 2, "AsyncFifo capacity must be at least two"
+	static assert CAPACITY <= 1048576, "AsyncFifo capacity exceeds supported pointer arithmetic"
+	static assert (CAPACITY & (CAPACITY - 1)) == 0, "AsyncFifo capacity must be a power of two"
 
 	// Owned provider; payload and capacity checked by its constraint.
 	storage: STORAGE
@@ -22,8 +22,8 @@ component DualClockFifo<T, CAPACITY: int = 256,
 	selectedData: T
 
 	// Owned endpoints with independently bound clocks.
-	writeSide: DualClockFifoWriteSide<T, CAPACITY>
-	readSide: DualClockFifoReadSide<T, CAPACITY>
+	writeSide: AsyncFifoWriteSide<T, CAPACITY>
+	readSide: AsyncFifoReadSide<T, CAPACITY>
 
 	// Write/read transfer decisions and registered read response.
 	public pushAccepted: out bool
@@ -48,8 +48,8 @@ component DualClockFifo<T, CAPACITY: int = 256,
 		this.context = writeContext
 		this.storage = new STORAGE()
 		this.inputData = data
-		this.writeSide = new DualClockFifoWriteSide<T, CAPACITY>(writeContext, writeClear, push, readSide.gray)
-		this.readSide = new DualClockFifoReadSide<T, CAPACITY>(readContext, readClear, pop,
+		this.writeSide = new AsyncFifoWriteSide<T, CAPACITY>(writeContext, writeClear, push, readSide.gray)
+		this.readSide = new AsyncFifoReadSide<T, CAPACITY>(readContext, readClear, pop,
 			writeSide.gray, selectedData)
 	}
 

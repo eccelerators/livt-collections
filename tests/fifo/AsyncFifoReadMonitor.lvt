@@ -6,7 +6,7 @@ using Livt.Collections
  * Observes read responses in the read clock domain. Test-only helper.
  * Clearing resets the scoreboard independently of construction state.
  */
-component DualClockFifoReadMonitor
+component AsyncFifoReadMonitor
 {
 	// Read-domain observation inputs and explicit scoreboard initialization.
 	clear: bool

@@ -127,10 +127,10 @@ Do not replace the independent fields or add larger vector-backed BitSets until
 the generated VHDL has a regression proving that sequences of `Set`, `Clear`,
 `Toggle`, and `Reset` preserve every unaffected bit.
 
-## Dual-clock FIFO
+## Asynchronous FIFO
 
-Use `DualClockFifo` to pass an ordered stream between independent clocks.
-See [usage and transfer timing](dual-clock-fifo.md) and
+Use `AsyncFifo` to pass an ordered stream between independent clocks.
+See [usage and transfer timing](async-fifo.md) and
 [backing storage selection](fifo-storage.md).
 
 For hardware integration:

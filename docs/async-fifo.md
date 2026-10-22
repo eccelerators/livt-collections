@@ -1,10 +1,10 @@
-# Dual-clock FIFO
+# Asynchronous FIFO
 
 A FIFO stores values in the order they arrive: the first value written is the
-first value read. A **dual-clock FIFO** lets the writer and reader use different
-clocks, including clocks with unrelated frequencies or phases.
+first value read. An **asynchronous FIFO**, lets the writer
+and reader use independent clocks with unrelated frequencies or phases.
 
-`Livt.Collections.DualClockFifo` transfers an ordered stream between those clock
+`Livt.Collections.AsyncFifo` transfers an ordered stream between those clock
 domains and buffers temporary differences in their processing rates. Typical uses
 include receiving sensor samples on an external clock, passing received network
 data to a processing clock, or buffering pixels between an input and image pipeline.
@@ -18,10 +18,10 @@ writes or stop offering data until space becomes available.
 | Component | Use it for |
 | --- | --- |
 | `Fifo<T, CAPACITY>` | Cycle-level transfers within one clock domain |
-| `DualClockFifo<T, CAPACITY, STORAGE>` | Cycle-level transfers between independent write/read clocks |
+| `AsyncFifo<T, CAPACITY, STORAGE>` | Cycle-level transfers between independent write/read clocks |
 | `Queue<T, CAPACITY>` | Scheduled enqueue/dequeue calls within one clock domain |
 
-`DualClockFifo` preserves payload values and ordering. It does not interpret
+`AsyncFifo` preserves payload values and ordering. It does not interpret
 packets, pixels, frame boundaries or application commands.
 
 ## Configuration and wiring
@@ -30,18 +30,18 @@ packets, pixels, frame boundaries or application commands.
 - `CAPACITY` is the number of stored values. It defaults to 256 and must be a
   power of two between 2 and 1,048,576. Choose a size that fits the target FPGA.
 - `STORAGE` selects the backing component. It defaults to
-  `DualClockFifoArray<T, CAPACITY>`; most callers can omit it.
+  `AsyncFifoArray<T, CAPACITY>`; most callers can omit it.
 
 The following fragment belongs inside the component that owns the FIFO:
 
 ```livt
-fifo: DualClockFifo<logic[12], 256>
+fifo: AsyncFifo<logic[12], 256>
 
 new(writeContext: IContext, readContext: IContext,
 	writeClear: bool, readClear: bool,
 	push: bool, token: logic[12], pop: bool)
 {
-	this.fifo = new DualClockFifo<logic[12], 256>(
+	this.fifo = new AsyncFifo<logic[12], 256>(
 		writeContext, readContext, writeClear, readClear, push, token, pop)
 }
 ```
@@ -119,16 +119,16 @@ for each domain, and stop traffic in both domains before changing either reset.
 Omit the third argument for automatic memory inference, or request a storage style:
 
 ```livt
-fifo: DualClockFifo<logic[12], 256, DualClockFifoBlockRam<logic[12], 256>>
+fifo: AsyncFifo<logic[12], 256, AsyncFifoBlockRam<logic[12], 256>>
 ```
 
-`DualClockFifoDistributedRam` requests distributed memory. Compatible custom
+`AsyncFifoDistributedRam` requests distributed memory. Compatible custom
 providers can also be selected. Memory styles are synthesis preferences; verify
 the actual mapping for your target. See [storage selection](fifo-storage.md) for
 examples and the custom-provider contract.
 
 For FPGA implementation, declare both clocks, preserve the pointer synchronizers
-and constrain the clock-domain crossings. See [hardware integration](hardware-notes.md#dual-clock-fifo).
+and constrain the clock-domain crossings. See [hardware integration](hardware-notes.md#asynchronous-fifo).
 
 ## Tests
 

@@ -5,7 +5,7 @@ namespace Livt.Collections
  * Preserves its combinational read tap; the synthesis tool decides mapping.
  * Not a vendor primitive or a promise that MAX 10 implements this resource.
  */
-component DualClockFifoBlockRam<T, CAPACITY: int = 256>
-	: DualClockFifoArray<T, CAPACITY, MemoryStyle.Block>
+component AsyncFifoBlockRam<T, CAPACITY: int = 256>
+	: AsyncFifoArray<T, CAPACITY, MemoryStyle.Block>
 {
 }

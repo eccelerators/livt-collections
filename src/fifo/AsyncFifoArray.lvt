@@ -7,7 +7,7 @@ namespace Livt.Collections
  * Auto does not force registers; Block is only a hint, and asynchronous reads
  * may prevent block-memory inference unless synthesis merges the read register.
  */
-component DualClockFifoArray<T, CAPACITY: int = 256,
+component AsyncFifoArray<T, CAPACITY: int = 256,
 	STYLE: MemoryStyle = MemoryStyle.Auto>
 	: IFifoStorage<T, FifoStorageGeometry<CAPACITY>>
 {

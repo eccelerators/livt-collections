@@ -7,15 +7,15 @@ using Livt.Collections
  */
 @Test
 @Context(ClockFrequency=25MHz)
-component DualClockFifoTest
+component AsyncFifoTest
 {
 	// Independent read clock borrowed by the FIFO and monitor.
 	@Context(ClockFrequency=50MHz)
 	readContext: IContext
 
 	// Owned subject and read-domain scoreboard.
-	fifo: DualClockFifo<byte, 4>
-	monitor: DualClockFifoReadMonitor
+	fifo: AsyncFifo<byte, 4>
+	monitor: AsyncFifoReadMonitor
 
 	// Test stimuli held stable across both domains.
 	clearBoth: bool
@@ -28,9 +28,9 @@ component DualClockFifoTest
 	new()
 	{
 		this.clearBoth = true
-		this.fifo = new DualClockFifo<byte, 4>(this.context, readContext,
+		this.fifo = new AsyncFifo<byte, 4>(this.context, readContext,
 			clearBoth, clearBoth, push, 0xA5, pop)
-		this.monitor = new DualClockFifoReadMonitor(readContext, clearBoth, fifo.popValid, fifo.popData)
+		this.monitor = new AsyncFifoReadMonitor(readContext, clearBoth, fifo.popValid, fifo.popData)
 	}
 
 	/**

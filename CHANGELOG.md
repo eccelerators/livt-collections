@@ -1,27 +1,43 @@
 # Changelog
 
+## 1.4.0
+
+### Changed
+
+- **Breaking API rename:** the asynchronous FIFO is now named
+  `AsyncFifo<T, CAPACITY, STORAGE>`. Update declarations and constructor calls
+  when upgrading from 1.3.0; no compatibility alias is provided.
+- Storage-provider names are now `AsyncFifoArray`, `AsyncFifoBlockRam` and
+  `AsyncFifoDistributedRam`. The default remains `AsyncFifoArray<T, CAPACITY>`.
+- Renamed internal clock-domain components and native test helpers consistently;
+  the FIFO test component is now `AsyncFifoTest`.
+- Updated README examples, storage guidance and FIFO documentation. The usage
+  guide is now `docs/async-fifo.md`.
+
+Constructor parameters, generic storage selection, clock-domain behavior,
+transfer timing and coordinated-clear semantics are unchanged. Existing
+single-clock collection APIs are unchanged.
+
 ## 1.3.0
 
 ### Added
 
-- `DualClockFifo<T, CAPACITY, STORAGE>` for independent write/read clocks,
-  with conservative full/empty signals, edge-level acceptance, registered read
-  responses and coordinated-clear acknowledgments.
-- Default `DualClockFifoArray<T, CAPACITY>` storage; existing two-argument FIFO
-  declarations retain their API and timing.
+- An asynchronous FIFO for independent write/read clocks, with conservative
+  full/empty signals, edge-level acceptance, registered read responses and
+  coordinated-clear acknowledgments.
+- Default array storage and optional block-memory and distributed-memory
+  specializations for the asynchronous FIFO.
 - Compile-time storage selection through `IFifoStorage<T, GEOMETRY>`,
   `FifoStorageGeometry<CAPACITY>` and a parameterless-construction constraint.
-- `DualClockFifoBlockRam` and `DualClockFifoDistributedRam` specializations that
-  request synthesis styles while preserving the array's access contract.
-- Livt tests under `tests/fifo` covering two clock contexts, FIFO fill/drain, coordinated
-  clear and reuse, registered in the package test suite.
+- Native Livt tests under `tests/fifo` covering two clock contexts, FIFO fill/drain,
+  coordinated clear and reuse.
 - FIFO usage, storage-selection, timing and clock-domain-crossing guidance.
 
 ### Changed
 
-- FIFO payload ownership is separated from pointer/clear control, without
-  adding a second public FIFO API or a runtime storage selector.
-- New FIFO sources follow the Livt Design Guide; each component has its own
+- Separated FIFO payload ownership from pointer/clear control without adding
+  another public FIFO API or a runtime storage selector.
+- Applied the Livt Design Guide to the new FIFO sources, with one component per
   file, documented responsibilities and explicit test initialization.
 
 ### Fixed
@@ -35,5 +51,4 @@
   physical CDC sign-off require a selected device and vendor-tool reports.
 - Storage providers must have a combinational read tap. Scheduled or registered
   read RAMs from Livt.IO cannot be passed directly to this interface.
-- Run `livt test` for the package suite, including the dual-clock FIFO test.
 - Existing single-clock Fifo/Queue/Stack/List/CircularBuffer storage APIs are unchanged.
