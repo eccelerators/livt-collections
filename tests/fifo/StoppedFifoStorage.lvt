@@ -1,0 +1,62 @@
+namespace Livt.Collections.Tests
+
+using Livt.Collections
+
+/**
+ * Stops the write clock immediately after its first non-reset edge.
+ * The asynchronous read tap remains observable from the live test clock.
+ */
+component StoppedFifoStorage
+{
+	// Test-only clock gate and single-edge payload store.
+	base: IContext
+	clockLine: clock
+	resetLine: reset
+	stopped: bool
+	storage: AsyncFifoArray<byte, 4>
+	public data: out byte
+	public edges: out uint
+	count: uint
+
+	/**
+	 * Owns storage in the gated context; the supplied timebase stays running.
+	 */
+	new(base: IContext)
+	{
+		this.base = base
+		this.context.clk = clockLine
+		this.context.rst = resetLine
+		this.storage = new AsyncFifoArray<byte, 4>()
+	}
+
+	/**
+	 * Drives a stable write before the only edge and keeps the read tap live.
+	 */
+	process Connect[]()
+	{
+		this.clockLine = base.clk
+		this.resetLine = base.rst
+		if (stopped) {
+			this.clockLine = 0b0
+		}
+
+		this.storage.writeEnable = true
+		this.storage.writeAddress = 0
+		this.storage.writeData = 0xA5
+		this.storage.readAddress = 0
+		this.data = storage.readData
+		this.edges = count
+	}
+
+	/**
+	 * Allows no additional write edge to hide a delayed storage write.
+	 */
+	process StopClock()
+	{
+		state Tick {
+			this.count = count + 1
+			this.stopped = true
+			goto Tick
+		}
+	}
+}

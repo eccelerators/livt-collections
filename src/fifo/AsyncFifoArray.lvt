@@ -18,12 +18,20 @@ component AsyncFifoArray<T, CAPACITY: int = 256,
 	@UninitializedStorage
 	cells: T[CAPACITY]
 
+	// Live write inputs; storage commits on the FIFO's accepting edge.
+	writeEnableWire: bool
+	writeAddressWire: uint
+	writeDataWire: T
+
 	/**
-	 * Exposes the selected element without a scheduled field accessor.
+	 * Binds write pins and exposes the read tap without scheduled field accessors.
 	 */
-	process ReadPort[]()
+	process Connect[]()
 	{
 		this.readData = cells[this.readAddress]
+		this.writeEnableWire = this.writeEnable
+		this.writeAddressWire = this.writeAddress
+		this.writeDataWire = this.writeData
 	}
 
 	/**
@@ -32,8 +40,8 @@ component AsyncFifoArray<T, CAPACITY: int = 256,
 	process WritePort()
 	{
 		state Tick {
-			if (this.writeEnable && context.rst == 0b0) {
-				this.cells[this.writeAddress] = this.writeData
+			if (writeEnableWire && context.rst == 0b0) {
+				this.cells[writeAddressWire] = writeDataWire
 			}
 
 			goto Tick

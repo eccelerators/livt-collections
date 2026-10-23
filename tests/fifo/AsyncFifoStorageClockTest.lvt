@@ -1,0 +1,31 @@
+namespace Livt.Collections.Tests
+
+/**
+ * A payload must commit on its accepting edge even if the write clock stops.
+ */
+@Test
+@Context(ClockFrequency=50MHz)
+component AsyncFifoStorageClockTest
+{
+	// The test clock remains alive while the storage clock is stopped.
+	storage: StoppedFifoStorage
+
+	/**
+	 * Owns the single-write fixture in a separately gated context.
+	 */
+	new()
+	{
+		this.storage = new StoppedFifoStorage(this.context)
+	}
+
+	/**
+	 * Checks the write is visible without requiring another write-domain edge.
+	 */
+	@Test
+	fn CommitsBeforeWriteClockStops()
+	{
+		Simulation.Wait(20)
+		assert storage.edges == 1 as uint, "Storage fixture must have exactly one write edge"
+		assert storage.data == 0xA5 as byte, "FIFO payload write was delayed past its accepting edge"
+	}
+}
