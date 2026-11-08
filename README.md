@@ -14,8 +14,11 @@ thin inherited aliases and do not retain or duplicate another capacity's memory.
 
 ```toml
 [dependencies]
-Livt.Collections = "1.4.0"
+Livt.Collections = "1.4.2"
 ```
+
+Version 1.4.2 publishes package discovery metadata, this README, the changelog,
+and the MIT license. Its component API is unchanged from 1.4.1.
 
 Version 1.4.0 standardizes the asynchronous FIFO API as `AsyncFifo`, with selectable storage backends. Consumers upgrading from 1.3.0 must update the FIFO and storage-provider type names; constructor parameters and hardware behavior are unchanged.
 

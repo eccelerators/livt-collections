@@ -1,8 +1,21 @@
 [project]
 name = "Livt.Collections"
-version = "1.4.1"
+version = "1.4.2"
+description = "Fixed-capacity FIFOs, queues, stacks, circular buffers, lists, and bit sets for Livt hardware."
+authors = ["Denis Vasilík"]
+repository = "https://github.com/eccelerators/livt-collections"
+homepage = "https://github.com/eccelerators/livt-collections"
+keywords = ["fpga", "collections", "fifo", "queue", "stack", "buffer"]
+license = "MIT"
 path = "src"
 outdir = "out"
+
+[publish]
+files = ["README.md", "CHANGELOG.md", "LICENSE"]
+
+[project.organization]
+name = "Eccelerators GmbH"
+website = "https://eccelerators.com"
 
 [tests]
 path = "tests"
