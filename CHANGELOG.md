@@ -7,6 +7,8 @@
 - Declare single-clock FIFO control and payload parameters as live inputs so
   request acceptance and storage updates share the same transfer edge.
 - Document the pre-edge request/acceptance contract for cycle-level consumers.
+- Use declarative simulation clock contexts to verify asynchronous storage
+  visibility between write edges.
 
 ### Added
 

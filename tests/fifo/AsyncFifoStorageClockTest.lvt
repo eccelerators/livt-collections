@@ -1,31 +1,54 @@
 namespace Livt.Collections.Tests
 
 /**
- * A payload must commit on its accepting edge even if the write clock stops.
+ * A payload must be visible after its accepting edge, before the next write edge.
  */
 @Test
 @Context(ClockFrequency=50MHz)
 component AsyncFifoStorageClockTest
 {
-	// The test clock remains alive while the storage clock is stopped.
-	storage: StoppedFifoStorage
+	// Includes the slow context's reset sequence and its first active edge.
+	const MAX_EDGE_POLLS: int = 2000
+
+	// The simulator supplies both clocks; no test logic drives a clock signal.
+	@Context(ClockFrequency = 100000Hz)
+	writeContext: IContext
+	storage: SlowClockFifoStorage
 
 	/**
-	 * Owns the single-write fixture in a separately gated context.
+	 * Gives the storage a long observation window between write edges.
 	 */
 	new()
 	{
-		this.storage = new StoppedFifoStorage(this.context)
+		storage = new SlowClockFifoStorage()
+		storage.context = writeContext
 	}
 
 	/**
 	 * Checks the write is visible without requiring another write-domain edge.
 	 */
 	@Test
-	fn CommitsBeforeWriteClockStops()
+	fn CommitsBeforeNextWriteEdge()
 	{
-		Simulation.Wait(20)
-		assert storage.edges == 1 as uint, "Storage fixture must have exactly one write edge"
-		assert storage.data == 0xA5 as byte, "FIFO payload write was delayed past its accepting edge"
+		for (var attempt = 0; attempt < MAX_EDGE_POLLS; attempt++) {
+			// Each generated context resets on its own clock; wait for the slow reset too.
+			if (writeContext.rst == 0b0) {
+				// Test-only observation inside the slow clock's stable interval.
+				var edges = cross storage.edges
+				assert edges <= 1 as uint, "Observation missed the first write edge"
+
+				if (edges == 1 as uint) {
+					var data = cross storage.data
+					assert data == 0xA5 as byte, "FIFO payload write was delayed past its accepting edge"
+					var finalEdges = cross storage.edges
+					assert finalEdges == 1 as uint, "Check must finish before the second write edge"
+					return
+				}
+			}
+
+			Simulation.Wait(1)
+		}
+
+		assert false, "Timed out waiting for the first write edge"
 	}
 }

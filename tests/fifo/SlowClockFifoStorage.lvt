@@ -1,0 +1,48 @@
+namespace Livt.Collections.Tests
+
+using Livt.Collections
+
+/**
+ * Writes a stable payload in an externally assigned slow test context.
+ * Exposes the active edge count alongside the asynchronous read tap.
+ */
+component SlowClockFifoStorage
+{
+	// Payload storage and observations in the inherited write context.
+	storage: AsyncFifoArray<byte, 4>
+	public data: out byte
+	public edges: out uint
+	count: uint
+
+	/**
+	 * Owns storage in the context assigned by the test.
+	 */
+	new()
+	{
+		this.storage = new AsyncFifoArray<byte, 4>()
+	}
+
+	/**
+	 * Holds the write payload stable and keeps the read tap live between edges.
+	 */
+	process Connect[]()
+	{
+		this.storage.writeEnable = true
+		this.storage.writeAddress = 0
+		this.storage.writeData = 0xA5
+		this.storage.readAddress = 0
+		this.data = storage.readData
+		this.edges = count
+	}
+
+	/**
+	 * Lets the fast test verify that no second active edge has occurred.
+	 */
+	process CountEdges()
+	{
+		state Tick {
+			this.count = count + 1
+			goto Tick
+		}
+	}
+}

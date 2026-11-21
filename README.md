@@ -259,6 +259,10 @@ compiler workarounds are documented in
 
 ## 🧪 Build and Test
 
+Clock-domain tests use declarative `@Context` simulation clocks. The asynchronous
+storage test checks that a write is visible after its first active edge and
+before the second, while an independent faster context observes the result.
+
 ```sh
 livt test
 ```
