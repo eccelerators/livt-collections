@@ -1,0 +1,114 @@
+namespace Livt.Collections.Tests
+
+using Livt.Collections
+
+/**
+ * Checks exact request, acceptance and response edges with changing payloads.
+ * Both endpoints share a clock here to isolate the FIFO's port timing contract.
+ */
+@Test
+@Context(ClockFrequency = 50MHz)
+component AsyncFifoTransferEdgeTest
+{
+	// Owned FIFO and live request signals.
+	fifo: AsyncFifo<byte, 4>
+	push: bool
+	pop: bool
+	data: byte
+	run: bool
+
+	// Combinational observations keep the scoreboard on the FIFO's transfer edge.
+	pushAccepted: bool
+	popAccepted: bool
+	popValid: bool
+	popData: byte
+	full: bool
+	empty: bool
+
+	// Transfer scoreboard and bounded stimulus phase.
+	cycles: uint
+	sent: uint
+	received: uint
+	sawFull: bool
+
+	/**
+	 * Connects changing payload and request signals directly to both endpoints.
+	 */
+	new()
+	{
+		fifo = new AsyncFifo<byte, 4>(
+			context,
+			context,
+			false,
+			false,
+			push,
+			data,
+			pop
+		)
+	}
+
+	/**
+	 * Fills, stalls, drains and wraps the FIFO with gaps in the producer requests.
+	 */
+	process Drive[]()
+	{
+		push = run && sent < 32 && (cycles & 3) != 1
+		pop = run && ((cycles >= 16 && cycles < 22) || cycles >= 30)
+		data = (sent + 0x30) as byte
+		pushAccepted = fifo.pushAccepted
+		popAccepted = fifo.popAccepted
+		popValid = fifo.popValid
+		popData = fifo.popData
+		full = fifo.full
+		empty = fifo.empty
+	}
+
+	/**
+	 * Checks pre-edge acceptance and the response from precisely the previous edge.
+	 */
+	process Observe()
+	{
+		var previousAccepted = false
+
+		state Sample {
+			if (run) {
+				assert pushAccepted == (push && !full)
+				assert popAccepted == (pop && !empty)
+				assert popValid == previousAccepted
+
+				if (popValid) {
+					assert popData == (received + 0x30) as byte
+					received++
+				}
+
+				if (pushAccepted) {
+					sent++
+				}
+
+				if (full) {
+					sawFull = true
+				}
+
+				cycles++
+			}
+
+			previousAccepted = popAccepted
+			goto Sample
+		}
+	}
+
+	/**
+	 * Requires all changing bytes to arrive once, in order, after backpressure.
+	 */
+	@Test
+	fn PreservesTransferEdgesAndPayloadOrder()
+	{
+		Simulation.Wait(20)
+		run = true
+		Simulation.Wait(250)
+		assert sent == 32
+		assert received == 32
+		assert sawFull
+		assert empty
+	}
+}

@@ -1,6 +1,6 @@
 [project]
 name = "Livt.Collections"
-version = "1.4.3"
+version = "1.4.4"
 description = "Fixed-capacity FIFOs, queues, stacks, circular buffers, lists, and bit sets for Livt hardware."
 authors = ["Denis Vasilík"]
 repository = "https://github.com/eccelerators/livt-collections"
@@ -22,6 +22,7 @@ path = "tests"
 components = [
     "FifoTest",
     "AsyncFifoTest",
+    "AsyncFifoTransferEdgeTest",
     "AsyncFifoStorageClockTest",
     "GenericCollectionsTest",
     "QueueInterfaceTest",

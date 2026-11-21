@@ -41,7 +41,13 @@ component AsyncFifoReadSide<T, CAPACITY: int>
 	 * Binds the supplied clock/reset context and live input signals.
 	 * The caller must coordinate reset/clear in both domains before traffic.
 	 */
-	new(domain: IContext, flush: bool, pop: bool, remote: logic[POINTER_BITS], inputData: T)
+	new(
+		domain: IContext,
+		flush: in bool,
+		pop: in bool,
+		remote: in logic[POINTER_BITS],
+		inputData: in T
+	)
 	{
 		this.context = domain
 		this.flush = flush
@@ -78,7 +84,7 @@ component AsyncFifoReadSide<T, CAPACITY: int>
 				this.responseValid = false
 			} else {
 				this.clearSeen = false
-				// Preserve the prior sample: sequential Livt assignments forward values.
+				// Advance the synchronizer using its previous first-stage sample.
 				var previous = stage1
 				this.stage1 = remote
 				this.stage2 = previous

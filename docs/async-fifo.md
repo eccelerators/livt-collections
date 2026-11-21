@@ -37,9 +37,15 @@ The following fragment belongs inside the component that owns the FIFO:
 ```livt
 fifo: AsyncFifo<logic[12], 256>
 
-new(writeContext: IContext, readContext: IContext,
-	writeClear: bool, readClear: bool,
-	push: bool, token: logic[12], pop: bool)
+new(
+	writeContext: IContext,
+	readContext: IContext,
+	writeClear: in bool,
+	readClear: in bool,
+	push: in bool,
+	token: in logic[12],
+	pop: in bool
+)
 {
 	this.fifo = new AsyncFifo<logic[12], 256>(
 		writeContext, readContext, writeClear, readClear, push, token, pop)
@@ -49,6 +55,12 @@ new(writeContext: IContext, readContext: IContext,
 This creates a buffer for 256 twelve-bit values. Bind the producer to
 `writeContext` and the consumer to `readContext`. Drive each request and clear
 signal in its corresponding domain. The FIFO owns its storage and both endpoints.
+
+These value-typed constructor parameters are declared as `in` signals: they
+remain live and introduce no extra input-sampling stage. The endpoints provide
+the explicit Gray-pointer synchronization and read-response registers. Adding
+a sampled wrapper around requests or payloads changes their alignment and must
+not be treated as equivalent wiring.
 
 ## Writing and reading
 
@@ -137,3 +149,11 @@ The Livt test and read-domain monitor live in `tests/fifo`. Run the package suit
 ```sh
 livt test
 ```
+
+`AsyncFifoTest` exercises independent write/read contexts and coordinated clear.
+`AsyncFifoTransferEdgeTest` isolates port timing with a shared clock, changing
+payloads, request gaps, full backpressure and repeated pointer wraparound. It
+checks acceptance before the edge and response validity exactly one edge later.
+`AsyncFifoStorageClockTest` uses a declarative slow clock to check payload storage
+visibility before the next write edge. These are simulation checks, not physical
+CDC or FPGA timing qualification.

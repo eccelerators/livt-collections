@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.4.4
+
+### Changed
+
+- Declare asynchronous FIFO control, payload and endpoint parameters as live
+  inputs, keeping acceptance, pointer advancement and payload capture aligned.
+- Preserve explicit two-stage remote-pointer synchronization without additional
+  constructor sampling stages.
+
+### Added
+
+- Transfer-edge coverage with changing payloads, request gaps, full backpressure,
+  pointer wraparound and one-edge read responses.
+
+### Compatibility
+
+- Existing constructor calls and storage-provider contracts remain unchanged.
+  Custom consumers must follow the documented pre-edge acceptance and registered
+  response contract rather than relying on additional input sampling latency.
+
 ## 1.4.3
 
 ### Changed

@@ -41,8 +41,15 @@ component AsyncFifo<T, CAPACITY: int = 256,
 	 * Owns selected storage in writeContext and endpoints in both clock contexts.
 	 * The caller must coordinate reset/clear in both domains before traffic.
 	 */
-	new(writeContext: IContext, readContext: IContext,
-		writeClear: bool, readClear: bool, push: bool, data: T, pop: bool)
+	new(
+		writeContext: IContext,
+		readContext: IContext,
+		writeClear: in bool,
+		readClear: in bool,
+		push: in bool,
+		data: in T,
+		pop: in bool
+	)
 	{
 		// Bind storage inheritance to the write context; the read endpoint is explicit.
 		this.context = writeContext

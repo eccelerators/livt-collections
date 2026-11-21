@@ -14,8 +14,13 @@ thin inherited aliases and do not retain or duplicate another capacity's memory.
 
 ```toml
 [dependencies]
-Livt.Collections = "1.4.3"
+Livt.Collections = "1.4.4"
 ```
+
+Version 1.4.4 also declares asynchronous FIFO requests, payloads and endpoint
+inputs as live signals. Acceptance is evaluated before the owning clock edge;
+the corresponding read response is available after that edge. The explicit
+two-stage Gray-pointer synchronizers remain part of the clock-domain crossing.
 
 Version 1.4.3 makes the single-clock FIFO's request and payload inputs explicit
 live connections. Acceptance and storage updates refer to the same transfer
