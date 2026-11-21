@@ -1,0 +1,112 @@
+namespace Livt.Collections.Tests
+
+using Livt.Collections
+
+/**
+ * Checks request, acceptance and storage on consecutive transfer edges.
+ */
+component FifoEdgeProbe<CAPACITY: int>
+{
+	static assert CAPACITY == 1 || CAPACITY == 3, "Probe supports one or three slots"
+
+	// Storage under test and its live transfer signals.
+	fifo: Fifo<byte, CAPACITY>
+	clear: bool
+	push: bool
+	pop: bool
+	payload: byte
+	pushAccepted: bool
+	popAccepted: bool
+	head: byte
+	count: int
+	space: int
+
+	// The test starts after reset and observes bounded completion.
+	start: bool
+	phase: int
+	public done: out bool
+
+	/**
+	 * Connects the FIFO without adding sampling stages at its boundary.
+	 */
+	new(start: in bool)
+	{
+		this.start = start
+		fifo = new Fifo<byte, CAPACITY>(
+			clear,
+			push,
+			payload,
+			pop,
+			pushAccepted,
+			popAccepted,
+			head,
+			count,
+			space
+		)
+	}
+
+	/**
+	 * Exercises fill, full replacement, drain, clear priority and empty no-bypass.
+	 */
+	process Drive[]()
+	{
+		clear = start && (phase == CAPACITY + 5 || phase == CAPACITY + 7)
+		push = start && ((phase >= 1 && phase <= CAPACITY + 2) ||
+			phase == CAPACITY + 4 || phase == CAPACITY + 5 || phase == CAPACITY + 6)
+		pop = start && phase >= CAPACITY + 2 && phase <= CAPACITY + 6
+		payload = phase as byte
+	}
+
+	/**
+	 * Samples pre-edge acceptance and compares storage with an independent queue.
+	 */
+	process CheckEdges()
+	{
+		var expected: byte[CAPACITY]
+		var expectedCount = 0
+
+		state Tick {
+			if (start && !done) {
+				assert count == expectedCount
+				assert space == CAPACITY - expectedCount
+
+				if (expectedCount > 0) {
+					assert head == expected[0]
+				} else {
+					assert head == 0x00
+				}
+
+				var take = !clear && pop && expectedCount > 0
+				var put = !clear && push && (expectedCount < CAPACITY || take)
+				assert popAccepted == take
+				assert pushAccepted == put
+
+				if (clear) {
+					expectedCount = 0
+				} else {
+					if (take) {
+						static if (CAPACITY == 3) {
+							expected[0] = expected[1]
+							expected[1] = expected[2]
+						}
+
+						expectedCount--
+					}
+
+					if (put) {
+						expected[expectedCount] = payload
+						expectedCount++
+					}
+				}
+
+				if (phase == CAPACITY + 8) {
+					done = true
+				} else {
+					phase++
+				}
+			}
+
+			goto Tick
+		}
+	}
+}

@@ -14,11 +14,13 @@ thin inherited aliases and do not retain or duplicate another capacity's memory.
 
 ```toml
 [dependencies]
-Livt.Collections = "1.4.2"
+Livt.Collections = "1.4.3"
 ```
 
-Version 1.4.2 publishes package discovery metadata, this README, the changelog,
-and the MIT license. Its component API is unchanged from 1.4.1.
+Version 1.4.3 makes the single-clock FIFO's request and payload inputs explicit
+live connections. Acceptance and storage updates refer to the same transfer
+edge, including when the FIFO is used by scheduled queue and UART wrappers.
+Existing constructor calls remain valid.
 
 Version 1.4.0 standardizes the asynchronous FIFO API as `AsyncFifo`, with selectable storage backends. Consumers upgrading from 1.3.0 must update the FIFO and storage-provider type names; constructor parameters and hardware behavior are unchanged.
 
@@ -43,6 +45,7 @@ convenient specializations.
 
 | Contract | Component | Capacity | Behavior when full |
 |---|---|---:|---|
+| Signal-level ports | `Fifo<T, CAPACITY>` | Positive capacity (default 64) | pushAccepted is false unless a simultaneous pop frees a slot |
 | Signal-level ports | `AsyncFifo<T, CAPACITY>` | Power of two, 2–1,048,576 | pushAccepted is false |
 | `IQueue<T>` | `Queue<T, CAPACITY>` | CAPACITY values (default 64) | TryEnqueue returns false |
 | `IQueue<byte>` | `Queue8` | 8 bytes | TryEnqueue returns false |
@@ -115,6 +118,10 @@ Fifo accepts up to one push and one pop per edge. Reset and clear suppress
 transfers. At full, simultaneous push/pop return the old head and preserve
 count; at empty, only push succeeds (no bypass). Acceptance and head data are
 combinational **pre-edge** signals and must be sampled at the transfer edge.
+The `clear`, `push`, `pushData`, and `pop` constructor parameters are explicit
+`in` signals: the FIFO does not insert a sampling register before this handshake.
+Drive requests and payload together and capture acceptance at the same edge;
+sampling acceptance only after the edge can observe the next transaction instead.
 See [hardware notes](docs/hardware-notes.md) for the current resource limitations.
 
 ### Asynchronous FIFO

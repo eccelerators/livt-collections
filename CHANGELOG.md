@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.4.3
+
+### Changed
+
+- Declare single-clock FIFO control and payload parameters as live inputs so
+  request acceptance and storage updates share the same transfer edge.
+- Document the pre-edge request/acceptance contract for cycle-level consumers.
+
+### Added
+
+- Clock-edge coverage for capacities one and three, including payload ordering,
+  full replacement, empty no-bypass behavior and clear priority.
+
+### Compatibility
+
+- Existing FIFO constructor calls and scheduled Queue APIs remain unchanged.
+  FIFO inputs are no longer sampled through an additional register stage.
+- No package dependencies are required.
+
 ## 1.4.2
 
 ### Added

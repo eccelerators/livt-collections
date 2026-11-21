@@ -42,8 +42,9 @@ component Fifo<T, CAPACITY: int = 64>
 
 	/**
 	 * Creates empty storage in the inherited clock/reset context.
+	 * Requests and payload are live inputs, sampled together at each transfer edge.
 	 */
-	new(clear: bool, push: bool, pushData: T, pop: bool,
+	new(clear: in bool, push: in bool, pushData: in T, pop: in bool,
 		pushAccepted: out bool, popAccepted: out bool, popData: out T,
 		count: out int, space: out int)
 	{

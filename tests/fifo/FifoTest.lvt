@@ -1,0 +1,36 @@
+namespace Livt.Collections.Tests
+
+/**
+ * Verifies live FIFO inputs at capacity one and a non-power-of-two capacity.
+ */
+@Test
+@Context(ClockFrequency = 100MHz)
+component FifoTest
+{
+	// Both probes observe the same start signal but own independent storage.
+	start: bool
+	single: FifoEdgeProbe<1>
+	triple: FifoEdgeProbe<3>
+
+	/**
+	 * Creates probes for the replacement and ring-buffer boundary cases.
+	 */
+	new()
+	{
+		single = new FifoEdgeProbe<1>(start)
+		triple = new FifoEdgeProbe<3>(start)
+	}
+
+	/**
+	 * Leaves reset before checking every edge, with a fixed completion budget.
+	 */
+	@Test
+	fn PreservesTransferEdgeTiming()
+	{
+		Simulation.Wait(20)
+		start = true
+		Simulation.Wait(100)
+		assert single.done
+		assert triple.done
+	}
+}
