@@ -6,11 +6,11 @@ using Livt.Collections
  * Checks two-context wiring, fill/drain and reuse through the Livt test runner.
  */
 @Test
-@Context(ClockFrequency=25MHz)
+@Context(ClockFrequency = 25MHz)
 component AsyncFifoTest
 {
 	// Independent read clock borrowed by the FIFO and monitor.
-	@Context(ClockFrequency=50MHz)
+	@Context(ClockFrequency = 50MHz)
 	readContext: IContext
 
 	// Owned subject and read-domain scoreboard.
@@ -27,10 +27,22 @@ component AsyncFifoTest
 	 */
 	new()
 	{
-		this.clearBoth = true
-		this.fifo = new AsyncFifo<byte, 4>(this.context, readContext,
-			clearBoth, clearBoth, push, 0xA5, pop)
-		this.monitor = new AsyncFifoReadMonitor(readContext, clearBoth, fifo.popValid, fifo.popData)
+		clearBoth = true
+		fifo = new AsyncFifo<byte, 4>(
+			context,
+			readContext,
+			clearBoth,
+			clearBoth,
+			push,
+			0xA5,
+			pop
+		)
+		monitor = new AsyncFifoReadMonitor(
+			readContext,
+			clearBoth,
+			fifo.popValid,
+			fifo.popData
+		)
 	}
 
 	/**
@@ -39,44 +51,44 @@ component AsyncFifoTest
 	@Test
 	fn FillDrainAndReuseAcrossContexts()
 	{
-		this.push = false
-		this.pop = false
-		this.clearBoth = true
+		push = false
+		pop = false
+		clearBoth = true
 		Simulation.Wait(20)
 		assert fifo.writeCleared
 		assert fifo.readCleared
-		this.clearBoth = false
+		clearBoth = false
 		Simulation.Wait(20)
-		this.push = true
+		push = true
 		Simulation.Wait(40)
 		assert fifo.full
-		this.push = false
+		push = false
 		Simulation.Wait(20)
-		this.pop = true
+		pop = true
 		Simulation.Wait(60)
-		this.pop = false
+		pop = false
 		Simulation.Wait(20)
 		assert fifo.empty
-		var first = sync this.monitor.GetCount()
+		var first = sync monitor.GetCount()
 		assert first == 4
-		var firstBadData = sync this.monitor.HasBadData()
+		var firstBadData = sync monitor.HasBadData()
 		assert !firstBadData
 
-		this.clearBoth = true
+		clearBoth = true
 		Simulation.Wait(20)
-		this.clearBoth = false
+		clearBoth = false
 		Simulation.Wait(20)
-		this.push = true
+		push = true
 		Simulation.Wait(40)
-		this.push = false
+		push = false
 		Simulation.Wait(20)
-		this.pop = true
+		pop = true
 		Simulation.Wait(60)
-		this.pop = false
+		pop = false
 		Simulation.Wait(20)
-		var second = sync this.monitor.GetCount()
+		var second = sync monitor.GetCount()
 		assert second == 4
-		var bad = sync this.monitor.HasBadData()
+		var bad = sync monitor.HasBadData()
 		assert !bad
 	}
 }

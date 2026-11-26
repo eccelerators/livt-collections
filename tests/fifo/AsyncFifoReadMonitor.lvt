@@ -20,10 +20,15 @@ component AsyncFifoReadMonitor
 	/**
 	 * Borrows read-domain signals and binds the observer to their context.
 	 */
-	new(domain: IContext, clear: bool, valid: bool, data: byte)
+	new(
+		domain: IContext,
+		clear: bool,
+		valid: bool,
+		data: byte
+	)
 	{
 		this.clear = clear
-		this.context = domain
+		context = domain
 		this.valid = valid
 		this.data = data
 	}
@@ -33,19 +38,17 @@ component AsyncFifoReadMonitor
 	 */
 	process Observe()
 	{
-		state Tick {
+		state {
 			if (clear) {
-				this.count = 0
-				this.badData = false
+				count = 0
+				badData = false
 			} elif (valid) {
-				this.count = count + 1
+				count = count + 1
 
 				if (data != 0xA5) {
-					this.badData = true
+					badData = true
 				}
 			}
-
-			goto Tick
 		}
 	}
 

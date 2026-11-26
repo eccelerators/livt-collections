@@ -19,7 +19,7 @@ component SlowClockFifoStorage
 	 */
 	new()
 	{
-		this.storage = new AsyncFifoArray<byte, 4>()
+		storage = new AsyncFifoArray<byte, 4>()
 	}
 
 	/**
@@ -27,12 +27,12 @@ component SlowClockFifoStorage
 	 */
 	process Connect[]()
 	{
-		this.storage.writeEnable = true
-		this.storage.writeAddress = 0
-		this.storage.writeData = 0xA5
-		this.storage.readAddress = 0
-		this.data = storage.readData
-		this.edges = count
+		storage.writeEnable = true
+		storage.writeAddress = 0
+		storage.writeData = 0xA5
+		storage.readAddress = 0
+		data = storage.readData
+		edges = count
 	}
 
 	/**
@@ -40,9 +40,8 @@ component SlowClockFifoStorage
 	 */
 	process CountEdges()
 	{
-		state Tick {
-			this.count = count + 1
-			goto Tick
+		state {
+			count = count + 1
 		}
 	}
 }

@@ -18,7 +18,7 @@ component BitSet8Test
 	 */
 	new()
 	{
-		this.bits = new BitSet8()
+		bits = new BitSet8()
 	}
 
 	/**
@@ -27,16 +27,16 @@ component BitSet8Test
 	@Test
 	fn TestSetClearAndValue()
 	{
-		this.bits.Reset()
-		this.bits.Set(0)
-		this.bits.Set(2)
-		this.bits.Set(7)
-		assert this.bits.IsSet(0) == true
-		assert this.bits.IsSet(2) == true
-		assert this.bits.IsSet(7) == true
-		assert this.bits.GetValue() == 133
-		this.bits.Clear(2)
-		assert this.bits.GetValue() == 129
+		bits.Reset()
+		bits.Set(0)
+		bits.Set(2)
+		bits.Set(7)
+		assert bits.IsSet(0) == true
+		assert bits.IsSet(2) == true
+		assert bits.IsSet(7) == true
+		assert bits.GetValue() == 133
+		bits.Clear(2)
+		assert bits.GetValue() == 129
 	}
 
 	/**
@@ -45,11 +45,11 @@ component BitSet8Test
 	@Test
 	fn TestToggle()
 	{
-		this.bits.Reset()
-		this.bits.Toggle(3)
-		assert this.bits.IsSet(3) == true
-		this.bits.Toggle(3)
-		assert this.bits.IsSet(3) == false
+		bits.Reset()
+		bits.Toggle(3)
+		assert bits.IsSet(3) == true
+		bits.Toggle(3)
+		assert bits.IsSet(3) == false
 	}
 
 	/**
@@ -58,14 +58,14 @@ component BitSet8Test
 	@Test
 	fn TestAnyNoneAndReset()
 	{
-		this.bits.Reset()
-		assert this.bits.None() == true
-		assert this.bits.Any() == false
-		this.bits.Set(5)
-		assert this.bits.Any() == true
-		assert this.bits.None() == false
-		this.bits.Reset()
-		assert this.bits.None() == true
+		bits.Reset()
+		assert bits.None() == true
+		assert bits.Any() == false
+		bits.Set(5)
+		assert bits.Any() == true
+		assert bits.None() == false
+		bits.Reset()
+		assert bits.None() == true
 	}
 
 	/**
@@ -74,15 +74,15 @@ component BitSet8Test
 	@Test
 	fn TestBoundsAndCapacity()
 	{
-		this.bits.Reset()
-		this.bits.Set(-1)
-		this.bits.Set(8)
-		this.bits.Toggle(9)
-		this.bits.Clear(-1)
-		this.bits.Clear(8)
-		assert this.bits.GetValue() == 0
-		assert this.bits.IsSet(-1) == false
-		assert this.bits.IsSet(8) == false
-		assert this.bits.GetCapacity() == 8
+		bits.Reset()
+		bits.Set(-1)
+		bits.Set(8)
+		bits.Toggle(9)
+		bits.Clear(-1)
+		bits.Clear(8)
+		assert bits.GetValue() == 0
+		assert bits.IsSet(-1) == false
+		assert bits.IsSet(8) == false
+		assert bits.GetCapacity() == 8
 	}
 }

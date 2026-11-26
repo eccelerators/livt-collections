@@ -40,11 +40,11 @@ fifo: AsyncFifo<logic[12], 256>
 new(
 	writeContext: IContext,
 	readContext: IContext,
-	writeClear: in bool,
-	readClear: in bool,
-	push: in bool,
-	token: in logic[12],
-	pop: in bool
+	@RefContext(writeContext) writeClear: in bool,
+	@RefContext(readContext) readClear: in bool,
+	@RefContext(writeContext) push: in bool,
+	@RefContext(writeContext) token: in logic[12],
+	@RefContext(readContext) pop: in bool
 )
 {
 	this.fifo = new AsyncFifo<logic[12], 256>(
@@ -55,6 +55,14 @@ new(
 This creates a buffer for 256 twelve-bit values. Bind the producer to
 `writeContext` and the consumer to `readContext`. Drive each request and clear
 signal in its corresponding domain. The FIFO owns its storage and both endpoints.
+
+The annotations preserve each input's domain through this wrapper rather than
+giving every signal the wrapper's own context. FIFO read-side outputs retain the
+read context; write-side outputs retain the write context. Connect each output
+to logic in that domain, or use an explicit crossing adapter. These declarations
+do not generate clocks or additional synchronization stages. For a ready/valid
+consumer, `Livt.IO.Cdc.StreamSynchronizer` provides buffering and backpressure on
+top of this FIFO's registered-read-response interface.
 
 These value-typed constructor parameters are declared as `in` signals: they
 remain live and introduce no extra input-sampling stage. The endpoints provide

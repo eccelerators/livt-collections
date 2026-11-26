@@ -20,9 +20,9 @@ component ListIteratorTest
 	 */
 	new()
 	{
-		this.values = new List8()
-		this.first = new ListIterator<byte>(this.values)
-		this.second = new ListIterator<byte>(this.values)
+		values = new List8()
+		first = new ListIterator<byte>(values)
+		second = new ListIterator<byte>(values)
 	}
 
 	/**
@@ -31,26 +31,26 @@ component ListIteratorTest
 	@Test
 	fn IndependentCursors()
 	{
-		this.values.Clear()
-		this.values.Add(0x01)
-		this.values.Add(0x02)
-		this.values.Add(0x03)
-		this.first.Reset()
-		this.second.Reset()
+		values.Clear()
+		values.Add(0x01)
+		values.Add(0x02)
+		values.Add(0x03)
+		first.Reset()
+		second.Reset()
 		var sum = 0
 
-		while (this.first.HasNext()) {
-			var value = this.first.Next()
+		while (first.HasNext()) {
+			var value = first.Next()
 			sum += value as int
 		}
 
 		assert sum == 6
-		var next = this.second.Next()
+		var next = second.Next()
 		assert next == 0x01
-		var size = this.values.GetSize()
+		var size = values.GetSize()
 		assert size == 3
-		this.first.Reset()
-		var repeated = this.first.Next()
+		first.Reset()
+		var repeated = first.Next()
 		assert repeated == 0x01
 	}
 }

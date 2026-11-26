@@ -51,8 +51,8 @@ component FifoEdgeProbe<CAPACITY: int>
 	process Drive[]()
 	{
 		clear = start && (phase == CAPACITY + 5 || phase == CAPACITY + 7)
-		push = start && ((phase >= 1 && phase <= CAPACITY + 2) ||
-			phase == CAPACITY + 4 || phase == CAPACITY + 5 || phase == CAPACITY + 6)
+		push = start && ((phase >= 1 && phase <= CAPACITY + 2)
+			|| phase == CAPACITY + 4 || phase == CAPACITY + 5 || phase == CAPACITY + 6)
 		pop = start && phase >= CAPACITY + 2 && phase <= CAPACITY + 6
 		payload = phase as byte
 	}

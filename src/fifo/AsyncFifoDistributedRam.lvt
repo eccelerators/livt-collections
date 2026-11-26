@@ -5,7 +5,5 @@ namespace Livt.Collections
  * Preserves its combinational read tap; the synthesis tool decides mapping.
  * Not a vendor primitive or a promise that MAX 10 implements this resource.
  */
-component AsyncFifoDistributedRam<T, CAPACITY: int = 256>
-	: AsyncFifoArray<T, CAPACITY, MemoryStyle.Distributed>
-{
-}
+component AsyncFifoDistributedRam<T, CAPACITY: int = 256> :
+	AsyncFifoArray<T, CAPACITY, MemoryStyle.Distributed> {}

@@ -44,9 +44,17 @@ component Fifo<T, CAPACITY: int = 64>
 	 * Creates empty storage in the inherited clock/reset context.
 	 * Requests and payload are live inputs, sampled together at each transfer edge.
 	 */
-	new(clear: in bool, push: in bool, pushData: in T, pop: in bool,
-		pushAccepted: out bool, popAccepted: out bool, popData: out T,
-		count: out int, space: out int)
+	new(
+		clear: in bool,
+		push: in bool,
+		pushData: in T,
+		pop: in bool,
+		pushAccepted: out bool,
+		popAccepted: out bool,
+		popData: out T,
+		count: out int,
+		space: out int
+	)
 	{
 		this.clear = clear
 		this.push = push
@@ -64,19 +72,19 @@ component Fifo<T, CAPACITY: int = 64>
 	 */
 	process Status[]()
 	{
-		this.count = (this.used as uint) as int
-		this.space = CAPACITY - ((this.used as uint) as int)
-		this.popAccepted = this.context.rst == 0b0 && !this.clear && this.pop && (this.used as uint) > 0
-		this.pushAccepted = this.context.rst == 0b0 &&
-			!this.clear &&
-			this.push &&
-			((this.used as uint) < (CAPACITY as uint) ||
-			(this.pop &&
-			(this.used as uint) > 0))
-		this.popData = this.zero
+		count = (used as uint) as int
+		space = CAPACITY - ((used as uint) as int)
+		popAccepted = context.rst == 0b0 && !clear && pop && (used as uint) > 0
+		pushAccepted = context.rst == 0b0
+			&& !clear
+			&& push
+			&& ((used as uint) < (CAPACITY as uint)
+			|| (pop
+			&& (used as uint) > 0))
+		popData = zero
 
-		if ((this.used as uint) > 0) {
-			this.popData = this.front
+		if ((used as uint) > 0) {
+			popData = front
 		}
 	}
 
@@ -85,7 +93,7 @@ component Fifo<T, CAPACITY: int = 64>
 	 */
 	process Update()
 	{
-		state Tick {
+		state {
 			var take = pop && (used as uint) > 0
 			var put = push && ((used as uint) < (CAPACITY as uint) || take)
 
@@ -142,8 +150,6 @@ component Fifo<T, CAPACITY: int = 64>
 					used = ((used as uint) - 1) as logic[COUNT_BITS]
 				}
 			}
-
-			goto Tick
 		}
 	}
 }

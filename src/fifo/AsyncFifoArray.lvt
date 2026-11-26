@@ -7,9 +7,12 @@ namespace Livt.Collections
  * Auto does not force registers; Block is only a hint, and asynchronous reads
  * may prevent block-memory inference unless synthesis merges the read register.
  */
-component AsyncFifoArray<T, CAPACITY: int = 256,
-	STYLE: MemoryStyle = MemoryStyle.Auto>
-	: IFifoStorage<T, FifoStorageGeometry<CAPACITY>>
+component AsyncFifoArray<
+	T,
+	CAPACITY: int = 256,
+	STYLE: MemoryStyle = MemoryStyle.Auto
+> :
+	IFifoStorage<T, FifoStorageGeometry<CAPACITY>>
 {
 	static assert CAPACITY >= 2, "FIFO storage capacity must be at least two"
 
@@ -28,10 +31,10 @@ component AsyncFifoArray<T, CAPACITY: int = 256,
 	 */
 	process Connect[]()
 	{
-		this.readData = cells[this.readAddress]
-		this.writeEnableWire = this.writeEnable
-		this.writeAddressWire = this.writeAddress
-		this.writeDataWire = this.writeData
+		readData = cells[readAddress]
+		writeEnableWire = writeEnable
+		writeAddressWire = writeAddress
+		writeDataWire = writeData
 	}
 
 	/**
@@ -39,12 +42,10 @@ component AsyncFifoArray<T, CAPACITY: int = 256,
 	 */
 	process WritePort()
 	{
-		state Tick {
+		state {
 			if (writeEnableWire && context.rst == 0b0) {
-				this.cells[writeAddressWire] = writeDataWire
+				cells[writeAddressWire] = writeDataWire
 			}
-
-			goto Tick
 		}
 	}
 }

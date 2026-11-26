@@ -43,10 +43,17 @@ component Queue<T, CAPACITY: int = 64> : IQueue<T>
 	 */
 	new()
 	{
-		this.fifo = new Fifo<T, CAPACITY>(
-			this.fifoClear, this.fifoPush, this.payload, this.fifoPop,
-			this.fifoPushAccepted, this.fifoPopAccepted, this.fifoData,
-			this.fifoCount, this.fifoSpace)
+		fifo = new Fifo<T, CAPACITY>(
+			fifoClear,
+			fifoPush,
+			payload,
+			fifoPop,
+			fifoPushAccepted,
+			fifoPopAccepted,
+			fifoData,
+			fifoCount,
+			fifoSpace
+		)
 	}
 
 	/**
@@ -58,8 +65,7 @@ component Queue<T, CAPACITY: int = 64> : IQueue<T>
 		enqueueRequest = !enqueueRequest
 
 		while (enqueueCompleted != enqueueRequest) {
-			state {
-			}
+			state {}
 		}
 
 		return enqueueAccepted
@@ -73,8 +79,7 @@ component Queue<T, CAPACITY: int = 64> : IQueue<T>
 		dequeueRequest = !dequeueRequest
 
 		while (dequeueCompleted != dequeueRequest) {
-			state {
-			}
+			state {}
 		}
 
 		value = response
@@ -89,8 +94,7 @@ component Queue<T, CAPACITY: int = 64> : IQueue<T>
 		clearRequest = !clearRequest
 
 		while (clearCompleted != clearRequest) {
-			state {
-			}
+			state {}
 		}
 	}
 
@@ -116,10 +120,10 @@ component Queue<T, CAPACITY: int = 64> : IQueue<T>
 	process Drive[]()
 	{
 		fifoClear = clearRequest != clearCompleted
-		fifoPush = !fifoClear &&
-			enqueueRequest != enqueueCompleted &&
-			(dequeueRequest == dequeueCompleted ||
-			!lastWasEnqueue)
+		fifoPush = !fifoClear
+			&& enqueueRequest != enqueueCompleted
+			&& (dequeueRequest == dequeueCompleted
+			|| !lastWasEnqueue)
 		fifoPop = !fifoClear && dequeueRequest != dequeueCompleted && !fifoPush
 	}
 
@@ -128,7 +132,7 @@ component Queue<T, CAPACITY: int = 64> : IQueue<T>
 	 */
 	process Complete()
 	{
-		state Tick {
+		state {
 			if (fifoClear) {
 				clearCompleted = clearRequest
 			} elif (fifoPush) {
@@ -141,8 +145,6 @@ component Queue<T, CAPACITY: int = 64> : IQueue<T>
 				dequeueCompleted = dequeueRequest
 				lastWasEnqueue = false
 			}
-
-			goto Tick
 		}
 	}
 }

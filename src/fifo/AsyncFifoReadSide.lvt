@@ -39,17 +39,20 @@ component AsyncFifoReadSide<T, CAPACITY: int>
 
 	/**
 	 * Binds the supplied clock/reset context and live input signals.
+	 * source identifies the write-domain pointer and stored payload; the local
+	 * two-register receiver and FIFO ownership protocol implement their crossing.
 	 * The caller must coordinate reset/clear in both domains before traffic.
 	 */
 	new(
 		domain: IContext,
+		source: IContext,
 		flush: in bool,
 		pop: in bool,
-		remote: in logic[POINTER_BITS],
-		inputData: in T
+		@RefContext(source) remote: in logic[POINTER_BITS],
+		@RefContext(source) inputData: in T
 	)
 	{
-		this.context = domain
+		context = domain
 		this.flush = flush
 		this.pop = pop
 		this.remote = remote
@@ -61,12 +64,12 @@ component AsyncFifoReadSide<T, CAPACITY: int>
 	 */
 	process Status[]()
 	{
-		this.cleared = clearSeen
-		this.data = response
-		this.valid = responseValid && !flush && context.rst == 0b0
-		this.empty = gray == stage2
-		this.address = (binary as uint) as logic[ADDRESS_BITS]
-		this.accepted = !flush && context.rst == 0b0 && pop && !empty
+		cleared = clearSeen
+		data = response
+		valid = responseValid && !flush && context.rst == 0b0
+		empty = gray == stage2
+		address = (binary as uint) as logic[ADDRESS_BITS]
+		accepted = !flush && context.rst == 0b0 && pop && !empty
 	}
 
 	/**
@@ -74,31 +77,30 @@ component AsyncFifoReadSide<T, CAPACITY: int>
 	 */
 	process Update()
 	{
-		state Tick {
+		state {
 			if (flush) {
-				this.clearSeen = true
-				this.binary = 0
-				this.gray = 0
-				this.stage1 = 0
-				this.stage2 = 0
-				this.responseValid = false
+				clearSeen = true
+				binary = 0
+				gray = 0
+				stage1 = 0
+				stage2 = 0
+				responseValid = false
 			} else {
-				this.clearSeen = false
+				clearSeen = false
 				// Advance the synchronizer using its previous first-stage sample.
 				var previous = stage1
-				this.stage1 = remote
-				this.stage2 = previous
-				this.responseValid = accepted
+				stage1 = remote
+				stage2 = previous
+				responseValid = accepted
 
 				if (accepted) {
-					this.response = inputData
+					// FIFO pointer synchronization makes this stored word safe to capture.
+					response = inputData
 					var next = ((binary as uint) + 1) & (((2 * CAPACITY) - 1) as uint)
-					this.binary = next as logic[POINTER_BITS]
-					this.gray = (next ^ (next >> 1)) as logic[POINTER_BITS]
+					binary = next as logic[POINTER_BITS]
+					gray = (next ^ (next >> 1)) as logic[POINTER_BITS]
 				}
 			}
-
-			goto Tick
 		}
 	}
 }

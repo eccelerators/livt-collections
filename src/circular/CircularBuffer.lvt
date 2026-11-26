@@ -27,24 +27,24 @@ component CircularBuffer<T, CAPACITY: int = 64> : ICircularBuffer<T>
 	 */
 	override fn Write(value: T)
 	{
-		if ((this.size as uint) == (CAPACITY as uint)) {
-			if ((this.head as uint) == ((CAPACITY - 1) as uint)) {
-				this.head = 0
+		if ((size as uint) == (CAPACITY as uint)) {
+			if ((head as uint) == ((CAPACITY - 1) as uint)) {
+				head = 0
 			} else {
-				this.head = ((this.head as uint) + 1) as logic[ADDRESS_BITS]
+				head = ((head as uint) + 1) as logic[ADDRESS_BITS]
 			}
 		}
 
-		if ((this.size as uint) < (CAPACITY as uint)) {
-			this.size = ((this.size as uint) + 1) as logic[COUNT_BITS]
+		if ((size as uint) < (CAPACITY as uint)) {
+			size = ((size as uint) + 1) as logic[COUNT_BITS]
 		}
 
-		this.storage[this.tail as uint] = value
+		storage[tail as uint] = value
 
-		if ((this.tail as uint) == ((CAPACITY - 1) as uint)) {
-			this.tail = 0
+		if ((tail as uint) == ((CAPACITY - 1) as uint)) {
+			tail = 0
 		} else {
-			this.tail = ((this.tail as uint) + 1) as logic[ADDRESS_BITS]
+			tail = ((tail as uint) + 1) as logic[ADDRESS_BITS]
 		}
 	}
 
@@ -53,20 +53,20 @@ component CircularBuffer<T, CAPACITY: int = 64> : ICircularBuffer<T>
 	 */
 	override fn Read() T
 	{
-		if ((this.size as uint) > 0) {
-			var value = this.storage[this.head as uint]
+		if ((size as uint) > 0) {
+			var value = storage[head as uint]
 
-			if ((this.head as uint) == ((CAPACITY - 1) as uint)) {
-				this.head = 0
+			if ((head as uint) == ((CAPACITY - 1) as uint)) {
+				head = 0
 			} else {
-				this.head = ((this.head as uint) + 1) as logic[ADDRESS_BITS]
+				head = ((head as uint) + 1) as logic[ADDRESS_BITS]
 			}
 
-			this.size = ((this.size as uint) - 1) as logic[COUNT_BITS]
+			size = ((size as uint) - 1) as logic[COUNT_BITS]
 			return value
 		}
 
-		return this.zero
+		return zero
 	}
 
 	/**
@@ -74,11 +74,11 @@ component CircularBuffer<T, CAPACITY: int = 64> : ICircularBuffer<T>
 	 */
 	override fn Peek() T
 	{
-		if ((this.size as uint) > 0) {
-			return this.storage[this.head as uint]
+		if ((size as uint) > 0) {
+			return storage[head as uint]
 		}
 
-		return this.zero
+		return zero
 	}
 
 	/**
@@ -86,7 +86,7 @@ component CircularBuffer<T, CAPACITY: int = 64> : ICircularBuffer<T>
 	 */
 	override fn IsEmpty() bool
 	{
-		return (this.size as uint) == 0
+		return (size as uint) == 0
 	}
 
 	/**
@@ -94,7 +94,7 @@ component CircularBuffer<T, CAPACITY: int = 64> : ICircularBuffer<T>
 	 */
 	override fn IsFull() bool
 	{
-		return (this.size as uint) == (CAPACITY as uint)
+		return (size as uint) == (CAPACITY as uint)
 	}
 
 	/**
@@ -102,7 +102,7 @@ component CircularBuffer<T, CAPACITY: int = 64> : ICircularBuffer<T>
 	 */
 	override fn GetSize() int
 	{
-		return (this.size as uint) as int
+		return (size as uint) as int
 	}
 
 	/**
@@ -110,8 +110,8 @@ component CircularBuffer<T, CAPACITY: int = 64> : ICircularBuffer<T>
 	 */
 	override fn Clear()
 	{
-		this.head = 0
-		this.tail = 0
-		this.size = 0
+		head = 0
+		tail = 0
+		size = 0
 	}
 }

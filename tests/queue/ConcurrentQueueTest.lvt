@@ -19,7 +19,7 @@ component ConcurrentQueueTest
 	 */
 	new()
 	{
-		this.queue = new Livt.Collections.Queue<byte, 3>()
+		queue = new Livt.Collections.Queue<byte, 3>()
 	}
 
 	/**
@@ -32,7 +32,7 @@ component ConcurrentQueueTest
 				var accepted = false
 
 				while (!accepted) {
-					accepted = this.queue.TryEnqueue((index + 1) as byte)
+					accepted = queue.TryEnqueue((index + 1) as byte)
 				}
 			}
 
@@ -55,7 +55,7 @@ component ConcurrentQueueTest
 				var accepted = false
 
 				while (!accepted) {
-					accepted = this.queue.TryEnqueue((index + 129) as byte)
+					accepted = queue.TryEnqueue((index + 129) as byte)
 				}
 			}
 
@@ -79,7 +79,7 @@ component ConcurrentQueueTest
 
 			while (first + second < 16) {
 				var value: byte = 0xFF
-				var accepted = this.queue.TryDequeue(value)
+				var accepted = queue.TryDequeue(value)
 
 				if (accepted) {
 					if (value < 0x80) {
@@ -115,7 +115,7 @@ component ConcurrentQueueTest
 		assert firstDone == true
 		assert secondDone == true
 		assert consumerDone == true
-		assert this.queue.GetCount() == 0
-		assert this.queue.GetSpace() == 3
+		assert queue.GetCount() == 0
+		assert queue.GetSpace() == 3
 	}
 }

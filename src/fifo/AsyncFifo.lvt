@@ -9,8 +9,11 @@ namespace Livt.Collections
  * Clear both endpoints while traffic is stopped; wait for both cleared flags.
  * See docs/async-fifo.md for reset, CDC constraints and read reservation.
  */
-component AsyncFifo<T, CAPACITY: int = 256,
-	STORAGE: IFifoStorage<T, FifoStorageGeometry<CAPACITY>> & new() = AsyncFifoArray<T, CAPACITY>>
+component AsyncFifo<
+	T,
+	CAPACITY: int = 256,
+	STORAGE: IFifoStorage<T, FifoStorageGeometry<CAPACITY>> & new() = AsyncFifoArray<T, CAPACITY>
+>
 {
 	static assert CAPACITY >= 2, "AsyncFifo capacity must be at least two"
 	static assert CAPACITY <= 1048576, "AsyncFifo capacity exceeds supported pointer arithmetic"
@@ -24,17 +27,23 @@ component AsyncFifo<T, CAPACITY: int = 256,
 	// Owned endpoints with independently bound clocks.
 	writeSide: AsyncFifoWriteSide<T, CAPACITY>
 	readSide: AsyncFifoReadSide<T, CAPACITY>
+	readOrigin: IContext
 
 	// Write/read transfer decisions and registered read response.
 	public pushAccepted: out bool
+	@RefContext(readOrigin)
 	public popAccepted: out bool
+	@RefContext(readOrigin)
 	public popValid: out bool
+	@RefContext(readOrigin)
 	public popData: out T
 	public full: out bool
+	@RefContext(readOrigin)
 	public empty: out bool
 
 	// Local clear acknowledgments; callers must coordinate both domains.
 	public writeCleared: out bool
+	@RefContext(readOrigin)
 	public readCleared: out bool
 
 	/**
@@ -44,20 +53,33 @@ component AsyncFifo<T, CAPACITY: int = 256,
 	new(
 		writeContext: IContext,
 		readContext: IContext,
-		writeClear: in bool,
-		readClear: in bool,
-		push: in bool,
-		data: in T,
-		pop: in bool
+		@RefContext(writeContext) writeClear: in bool,
+		@RefContext(readContext) readClear: in bool,
+		@RefContext(writeContext) push: in bool,
+		@RefContext(writeContext) data: in T,
+		@RefContext(readContext) pop: in bool
 	)
 	{
 		// Bind storage inheritance to the write context; the read endpoint is explicit.
-		this.context = writeContext
-		this.storage = new STORAGE()
-		this.inputData = data
-		this.writeSide = new AsyncFifoWriteSide<T, CAPACITY>(writeContext, writeClear, push, readSide.gray)
-		this.readSide = new AsyncFifoReadSide<T, CAPACITY>(readContext, readClear, pop,
-			writeSide.gray, selectedData)
+		context = writeContext
+		readOrigin = readContext
+		storage = new STORAGE()
+		inputData = data
+		writeSide = new AsyncFifoWriteSide<T, CAPACITY>(
+			writeContext,
+			readContext,
+			writeClear,
+			push,
+			readSide.gray
+		)
+		readSide = new AsyncFifoReadSide<T, CAPACITY>(
+			readContext,
+			writeContext,
+			readClear,
+			pop,
+			writeSide.gray,
+			selectedData
+		)
 	}
 
 	/**
@@ -65,18 +87,18 @@ component AsyncFifo<T, CAPACITY: int = 256,
 	 */
 	process Wire[]()
 	{
-		this.selectedData = storage.readData
-		this.storage.writeEnable = writeSide.accepted
-		this.storage.writeAddress = writeSide.address as uint
-		this.storage.writeData = inputData
-		this.storage.readAddress = readSide.address as uint
-		this.pushAccepted = writeSide.accepted
-		this.popAccepted = readSide.accepted
-		this.popValid = readSide.valid
-		this.popData = readSide.data
-		this.writeCleared = writeSide.cleared
-		this.readCleared = readSide.cleared
-		this.full = writeSide.full
-		this.empty = readSide.empty
+		selectedData = storage.readData
+		storage.writeEnable = writeSide.accepted
+		storage.writeAddress = writeSide.address as uint
+		storage.writeData = inputData
+		storage.readAddress = (cross readSide.address) as uint
+		pushAccepted = writeSide.accepted
+		popAccepted = readSide.accepted
+		popValid = readSide.valid
+		popData = readSide.data
+		writeCleared = writeSide.cleared
+		readCleared = readSide.cleared
+		full = writeSide.full
+		empty = readSide.empty
 	}
 }

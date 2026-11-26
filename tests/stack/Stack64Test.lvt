@@ -18,7 +18,7 @@ component Stack64Test
 	 */
 	new()
 	{
-		this.stack = new Stack64()
+		stack = new Stack64()
 	}
 
 	/**
@@ -27,22 +27,22 @@ component Stack64Test
 	@Test
 	fn TestCapacityAndLifoOrder()
 	{
-		this.stack.Clear()
-		this.stack.Push(0b0000_0010)
+		stack.Clear()
+		stack.Push(0b0000_0010)
 
 		for (var i = 1; i < 64; i++) {
-			this.stack.Push(0b0000_0001)
+			stack.Push(0b0000_0001)
 		}
 
-		assert this.stack.IsFull() == true
-		assert this.stack.GetSize() == 64
+		assert stack.IsFull() == true
+		assert stack.GetSize() == 64
 
 		for (var i = 1; i < 64; i++) {
-			assert this.stack.Pop() == 0b0000_0001
+			assert stack.Pop() == 0b0000_0001
 		}
 
-		assert this.stack.Pop() == 0b0000_0010
-		assert this.stack.IsEmpty() == true
+		assert stack.Pop() == 0b0000_0010
+		assert stack.IsEmpty() == true
 	}
 
 	/**
@@ -51,14 +51,14 @@ component Stack64Test
 	@Test
 	fn TestFullStackRejectsAdditionalElement()
 	{
-		this.stack.Clear()
+		stack.Clear()
 
 		for (var i = 0; i < 64; i++) {
-			this.stack.Push(0b0000_0001)
+			stack.Push(0b0000_0001)
 		}
 
-		this.stack.Push(0b0000_0010)
-		assert this.stack.GetSize() == 64
-		assert this.stack.Peek() == 0b0000_0001
+		stack.Push(0b0000_0010)
+		assert stack.GetSize() == 64
+		assert stack.Peek() == 0b0000_0001
 	}
 }

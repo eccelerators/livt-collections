@@ -19,7 +19,7 @@ component ListIterator<T> : IResettableIterator<T>
 	new(source: IList<T>)
 	{
 		this.source = source
-		this.position = 0
+		position = 0
 	}
 
 	/**
@@ -27,7 +27,7 @@ component ListIterator<T> : IResettableIterator<T>
 	 */
 	override fn Reset()
 	{
-		this.position = 0
+		position = 0
 	}
 
 	/**
@@ -35,7 +35,7 @@ component ListIterator<T> : IResettableIterator<T>
 	 */
 	override fn HasNext() bool
 	{
-		return this.position < this.source.GetSize()
+		return position < source.GetSize()
 	}
 
 	/**
@@ -43,9 +43,9 @@ component ListIterator<T> : IResettableIterator<T>
 	 */
 	override fn Next() T
 	{
-		assert this.position < this.source.GetSize(), "List iterator is exhausted"
-		var value = this.source.Get(this.position)
-		this.position++
+		assert position < source.GetSize(), "List iterator is exhausted"
+		var value = source.Get(position)
+		position++
 		return value
 	}
 }

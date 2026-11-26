@@ -19,7 +19,7 @@ component QueueClearConcurrencyTest
 	 */
 	new()
 	{
-		this.queue = new Livt.Collections.Queue<byte, 3>()
+		queue = new Livt.Collections.Queue<byte, 3>()
 	}
 
 	/**
@@ -28,11 +28,10 @@ component QueueClearConcurrencyTest
 	process Clearer()
 	{
 		while (!start) {
-			state {
-			}
+			state {}
 		}
 
-		this.queue.Clear()
+		queue.Clear()
 		cleared = true
 
 		state Done {
@@ -46,11 +45,10 @@ component QueueClearConcurrencyTest
 	process Producer()
 	{
 		while (!start) {
-			state {
-			}
+			state {}
 		}
 
-		assert this.queue.TryEnqueue(0x5A) == true
+		assert queue.TryEnqueue(0x5A) == true
 		produced = true
 
 		state Done {
@@ -64,15 +62,15 @@ component QueueClearConcurrencyTest
 	@Test
 	fn TestClearAndEnqueue()
 	{
-		assert this.queue.TryEnqueue(0x11) == true
+		assert queue.TryEnqueue(0x11) == true
 		start = true
 		Simulation.Wait(500)
 		assert cleared == true
 		assert produced == true
-		var count = this.queue.GetCount()
+		var count = queue.GetCount()
 		assert count == 0 || count == 1
 		var value: byte
-		var accepted = this.queue.TryDequeue(value)
+		var accepted = queue.TryDequeue(value)
 
 		if (count == 1) {
 			assert accepted == true
@@ -82,8 +80,8 @@ component QueueClearConcurrencyTest
 			assert value == 0x00
 		}
 
-		assert this.queue.TryDequeue(value) == false
+		assert queue.TryDequeue(value) == false
 		assert value == 0x00
-		assert this.queue.GetCount() == 0
+		assert queue.GetCount() == 0
 	}
 }

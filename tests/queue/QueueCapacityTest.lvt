@@ -19,10 +19,10 @@ component QueueCapacityTest
 	 */
 	new()
 	{
-		this.single = new Livt.Collections.Queue<byte, 1>()
-		this.large = new Livt.Collections.Queue<byte, 64>()
-		this.integers = new Livt.Collections.Queue<int, 3>()
-		this.flags = new Livt.Collections.Queue<bool, 1>()
+		single = new Livt.Collections.Queue<byte, 1>()
+		large = new Livt.Collections.Queue<byte, 64>()
+		integers = new Livt.Collections.Queue<int, 3>()
+		flags = new Livt.Collections.Queue<bool, 1>()
 	}
 
 	/**
@@ -31,17 +31,17 @@ component QueueCapacityTest
 	@Test
 	fn TestCapacityOne()
 	{
-		this.single.Clear()
+		single.Clear()
 		var value: byte
 
 		for (var index = 0; index < 4; index++) {
-			assert this.single.TryEnqueue(index as byte) == true
-			assert this.single.TryEnqueue(0xFF) == false
-			assert this.single.GetCount() == 1
-			assert this.single.GetSpace() == 0
-			assert this.single.TryDequeue(value) == true
+			assert single.TryEnqueue(index as byte) == true
+			assert single.TryEnqueue(0xFF) == false
+			assert single.GetCount() == 1
+			assert single.GetSpace() == 0
+			assert single.TryDequeue(value) == true
 			assert value == index as byte
-			assert this.single.TryDequeue(value) == false
+			assert single.TryDequeue(value) == false
 			assert value == 0x00
 		}
 	}
@@ -52,24 +52,24 @@ component QueueCapacityTest
 	@Test
 	fn TestCapacity64()
 	{
-		this.large.Clear()
+		large.Clear()
 
 		for (var index = 0; index < 64; index++) {
-			assert this.large.TryEnqueue(index as byte) == true
+			assert large.TryEnqueue(index as byte) == true
 		}
 
-		assert this.large.GetCount() == 64
-		assert this.large.GetSpace() == 0
-		assert this.large.TryEnqueue(0xFF) == false
+		assert large.GetCount() == 64
+		assert large.GetSpace() == 0
+		assert large.TryEnqueue(0xFF) == false
 		var value: byte
 
 		for (var index = 0; index < 64; index++) {
-			assert this.large.TryDequeue(value) == true
+			assert large.TryDequeue(value) == true
 			assert value == index as byte
 		}
 
-		assert this.large.GetCount() == 0
-		assert this.large.GetSpace() == 64
+		assert large.GetCount() == 0
+		assert large.GetSpace() == 64
 	}
 
 	/**
@@ -78,20 +78,20 @@ component QueueCapacityTest
 	@Test
 	fn TestPayloadTypesAndClear()
 	{
-		this.integers.Clear()
-		assert this.integers.TryEnqueue(-123) == true
+		integers.Clear()
+		assert integers.TryEnqueue(-123) == true
 		var number: int
-		assert this.integers.TryDequeue(number) == true
+		assert integers.TryDequeue(number) == true
 		assert number == -123
-		assert this.integers.TryEnqueue(456) == true
-		this.integers.Clear()
-		assert this.integers.TryDequeue(number) == false
+		assert integers.TryEnqueue(456) == true
+		integers.Clear()
+		assert integers.TryDequeue(number) == false
 		assert number == 0
-		assert this.flags.TryEnqueue(true) == true
+		assert flags.TryEnqueue(true) == true
 		var flag: bool
-		assert this.flags.TryDequeue(flag) == true
+		assert flags.TryDequeue(flag) == true
 		assert flag == true
-		assert this.flags.TryDequeue(flag) == false
+		assert flags.TryDequeue(flag) == false
 		assert flag == false
 	}
 }

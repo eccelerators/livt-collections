@@ -24,9 +24,9 @@ component List<T, CAPACITY: int = 64> : IList<T>
 	 */
 	override fn Add(value: T)
 	{
-		if ((this.count as uint) < (CAPACITY as uint)) {
-			this.storage[this.count as uint] = value
-			this.count = ((this.count as uint) + 1) as logic[COUNT_BITS]
+		if ((count as uint) < (CAPACITY as uint)) {
+			storage[count as uint] = value
+			count = ((count as uint) + 1) as logic[COUNT_BITS]
 		}
 	}
 
@@ -36,14 +36,14 @@ component List<T, CAPACITY: int = 64> : IList<T>
 	override fn Get(index: int) T
 	{
 		if (index < 0) {
-			return this.zero
+			return zero
 		}
 
-		if (index >= ((this.count as uint) as int)) {
-			return this.zero
+		if (index >= ((count as uint) as int)) {
+			return zero
 		}
 
-		return this.storage[index]
+		return storage[index]
 	}
 
 	/**
@@ -55,11 +55,11 @@ component List<T, CAPACITY: int = 64> : IList<T>
 			return
 		}
 
-		if (index >= ((this.count as uint) as int)) {
+		if (index >= ((count as uint) as int)) {
 			return
 		}
 
-		this.storage[index] = value
+		storage[index] = value
 	}
 
 	/**
@@ -67,13 +67,13 @@ component List<T, CAPACITY: int = 64> : IList<T>
 	 */
 	override fn RemoveLast() T
 	{
-		if ((this.count as uint) > 0) {
-			var lastIndex = (this.count as uint) - 1
-			this.count = lastIndex as logic[COUNT_BITS]
-			return this.storage[lastIndex]
+		if ((count as uint) > 0) {
+			var lastIndex = (count as uint) - 1
+			count = lastIndex as logic[COUNT_BITS]
+			return storage[lastIndex]
 		}
 
-		return this.zero
+		return zero
 	}
 
 	/**
@@ -81,7 +81,7 @@ component List<T, CAPACITY: int = 64> : IList<T>
 	 */
 	override fn GetSize() int
 	{
-		return (this.count as uint) as int
+		return (count as uint) as int
 	}
 
 	/**
@@ -89,7 +89,7 @@ component List<T, CAPACITY: int = 64> : IList<T>
 	 */
 	override fn IsEmpty() bool
 	{
-		return (this.count as uint) == 0
+		return (count as uint) == 0
 	}
 
 	/**
@@ -97,7 +97,7 @@ component List<T, CAPACITY: int = 64> : IList<T>
 	 */
 	override fn IsFull() bool
 	{
-		return (this.count as uint) == (CAPACITY as uint)
+		return (count as uint) == (CAPACITY as uint)
 	}
 
 	/**
@@ -105,6 +105,6 @@ component List<T, CAPACITY: int = 64> : IList<T>
 	 */
 	override fn Clear()
 	{
-		this.count = 0
+		count = 0
 	}
 }

@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.4.5
+
+### Changed
+
+- Standardized source and test layout and simplified redundant member qualification
+  and single-state process loops without changing public collection APIs.
+- Preserve read- and write-domain provenance through asynchronous FIFO signal
+  ports and internal pointer receivers. Public FIFO constructor calls and
+  transfer timing remain unchanged.
+
+- Document context-preserving wrapper inputs and include collection guides in
+  the published package.
+
+### Compatibility
+
+- Requires compiler support for `@RefContext` signal provenance. Existing
+  constructor calls, storage providers and transfer timing remain unchanged.
+
 ## 1.4.4
 
 ### Changed

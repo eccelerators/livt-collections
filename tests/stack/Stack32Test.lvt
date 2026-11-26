@@ -18,7 +18,7 @@ component Stack32Test
 	 */
 	new()
 	{
-		this.stack = new Stack32()
+		stack = new Stack32()
 	}
 
 	/**
@@ -27,16 +27,16 @@ component Stack32Test
 	@Test
 	fn TestLifoOrderAndPeek()
 	{
-		this.stack.Clear()
-		this.stack.Push(0b0000_0001)
-		this.stack.Push(0b0000_0010)
-		this.stack.Push(0b0000_0011)
-		assert this.stack.Peek() == 0b0000_0011
-		assert this.stack.GetSize() == 3
-		assert this.stack.Pop() == 0b0000_0011
-		assert this.stack.Pop() == 0b0000_0010
-		assert this.stack.Pop() == 0b0000_0001
-		assert this.stack.IsEmpty() == true
+		stack.Clear()
+		stack.Push(0b0000_0001)
+		stack.Push(0b0000_0010)
+		stack.Push(0b0000_0011)
+		assert stack.Peek() == 0b0000_0011
+		assert stack.GetSize() == 3
+		assert stack.Pop() == 0b0000_0011
+		assert stack.Pop() == 0b0000_0010
+		assert stack.Pop() == 0b0000_0001
+		assert stack.IsEmpty() == true
 	}
 
 	/**
@@ -45,18 +45,18 @@ component Stack32Test
 	@Test
 	fn TestFullStackRejectsAdditionalElement()
 	{
-		this.stack.Clear()
+		stack.Clear()
 
 		for (var i = 0; i < 32; i++) {
-			this.stack.Push(0b0000_0001)
+			stack.Push(0b0000_0001)
 		}
 
-		this.stack.Push(0b0000_0010)
-		assert this.stack.IsFull() == true
-		assert this.stack.GetSize() == 32
+		stack.Push(0b0000_0010)
+		assert stack.IsFull() == true
+		assert stack.GetSize() == 32
 
 		for (var i = 0; i < 32; i++) {
-			assert this.stack.Pop() == 0b0000_0001
+			assert stack.Pop() == 0b0000_0001
 		}
 	}
 
@@ -66,11 +66,11 @@ component Stack32Test
 	@Test
 	fn TestClearAllowsReuse()
 	{
-		this.stack.Clear()
-		this.stack.Push(0b0000_0001)
-		this.stack.Clear()
-		this.stack.Push(0b0000_0010)
-		assert this.stack.GetSize() == 1
-		assert this.stack.Pop() == 0b0000_0010
+		stack.Clear()
+		stack.Push(0b0000_0001)
+		stack.Clear()
+		stack.Push(0b0000_0010)
+		assert stack.GetSize() == 1
+		assert stack.Pop() == 0b0000_0010
 	}
 }

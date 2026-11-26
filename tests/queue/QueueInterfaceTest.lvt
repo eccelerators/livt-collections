@@ -17,8 +17,8 @@ component QueueInterfaceTest
 	 */
 	new()
 	{
-		this.bytes = new Queue8()
-		this.numbers = new Livt.Collections.Queue<int, 3>()
+		bytes = new Queue8()
+		numbers = new Livt.Collections.Queue<int, 3>()
 	}
 
 	/**
@@ -27,14 +27,14 @@ component QueueInterfaceTest
 	@Test
 	fn TestNamedByteQueue()
 	{
-		this.bytes.Clear()
-		assert this.bytes.GetSpace() == 8
-		assert this.bytes.TryEnqueue(0x00) == true
-		assert this.bytes.GetCount() == 1
+		bytes.Clear()
+		assert bytes.GetSpace() == 8
+		assert bytes.TryEnqueue(0x00) == true
+		assert bytes.GetCount() == 1
 		var value: byte = 0xFF
-		assert this.bytes.TryDequeue(value) == true
+		assert bytes.TryDequeue(value) == true
 		assert value == 0x00
-		assert this.bytes.TryDequeue(value) == false
+		assert bytes.TryDequeue(value) == false
 		assert value == 0x00
 	}
 
@@ -44,21 +44,21 @@ component QueueInterfaceTest
 	@Test
 	fn TestGenericIntegerQueue()
 	{
-		this.numbers.Clear()
-		assert this.numbers.TryEnqueue(-123) == true
-		assert this.numbers.TryEnqueue(0) == true
-		assert this.numbers.TryEnqueue(456) == true
-		assert this.numbers.TryEnqueue(999) == false
-		assert this.numbers.GetCount() == 3
-		assert this.numbers.GetSpace() == 0
+		numbers.Clear()
+		assert numbers.TryEnqueue(-123) == true
+		assert numbers.TryEnqueue(0) == true
+		assert numbers.TryEnqueue(456) == true
+		assert numbers.TryEnqueue(999) == false
+		assert numbers.GetCount() == 3
+		assert numbers.GetSpace() == 0
 		var value: int
-		assert this.numbers.TryDequeue(value) == true
+		assert numbers.TryDequeue(value) == true
 		assert value == -123
-		assert this.numbers.TryDequeue(value) == true
+		assert numbers.TryDequeue(value) == true
 		assert value == 0
-		assert this.numbers.TryDequeue(value) == true
+		assert numbers.TryDequeue(value) == true
 		assert value == 456
-		assert this.numbers.TryDequeue(value) == false
+		assert numbers.TryDequeue(value) == false
 		assert value == 0
 	}
 }

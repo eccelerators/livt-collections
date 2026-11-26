@@ -18,7 +18,7 @@ component Stack16Test
 	 */
 	new()
 	{
-		this.stack = new Stack16()
+		stack = new Stack16()
 	}
 
 	/**
@@ -27,21 +27,21 @@ component Stack16Test
 	@Test
 	fn TestCapacityAndLifoOrder()
 	{
-		this.stack.Clear()
-		this.stack.Push(0b0000_0010)
+		stack.Clear()
+		stack.Push(0b0000_0010)
 
 		for (var i = 1; i < 16; i++) {
-			this.stack.Push(0b0000_0001)
+			stack.Push(0b0000_0001)
 		}
 
-		assert this.stack.IsFull() == true
-		assert this.stack.GetSize() == 16
+		assert stack.IsFull() == true
+		assert stack.GetSize() == 16
 
 		for (var i = 1; i < 16; i++) {
-			assert this.stack.Pop() == 0b0000_0001
+			assert stack.Pop() == 0b0000_0001
 		}
 
-		assert this.stack.Pop() == 0b0000_0010
+		assert stack.Pop() == 0b0000_0010
 	}
 
 	/**
@@ -50,11 +50,11 @@ component Stack16Test
 	@Test
 	fn TestClearAllowsReuse()
 	{
-		this.stack.Clear()
-		this.stack.Push(0b0000_0001)
-		this.stack.Clear()
-		this.stack.Push(0b0000_0010)
-		assert this.stack.GetSize() == 1
-		assert this.stack.Pop() == 0b0000_0010
+		stack.Clear()
+		stack.Push(0b0000_0001)
+		stack.Clear()
+		stack.Push(0b0000_0010)
+		assert stack.GetSize() == 1
+		assert stack.Pop() == 0b0000_0010
 	}
 }

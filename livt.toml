@@ -1,6 +1,6 @@
 [project]
 name = "Livt.Collections"
-version = "1.4.4"
+version = "1.4.5"
 description = "Fixed-capacity FIFOs, queues, stacks, circular buffers, lists, and bit sets for Livt hardware."
 authors = ["Denis Vasilík"]
 repository = "https://github.com/eccelerators/livt-collections"
@@ -11,7 +11,7 @@ path = "src"
 outdir = "out"
 
 [publish]
-files = ["README.md", "CHANGELOG.md", "LICENSE"]
+files = ["README.md", "CHANGELOG.md", "LICENSE", "docs/async-fifo.md", "docs/fifo-storage.md", "docs/usage.md", "docs/hardware-notes.md"]
 
 [project.organization]
 name = "Eccelerators GmbH"

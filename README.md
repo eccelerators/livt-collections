@@ -14,8 +14,14 @@ thin inherited aliases and do not retain or duplicate another capacity's memory.
 
 ```toml
 [dependencies]
-Livt.Collections = "1.4.4"
+Livt.Collections = "1.4.5"
 ```
+
+Version 1.4.5 preserves asynchronous FIFO signal origins through constructor
+wiring and read/write endpoint ports. Public constructor calls and transfer
+timing are unchanged. Wrappers should preserve these contexts using
+`@RefContext`; see [Asynchronous FIFO](docs/async-fifo.md). This requires a
+compiler supporting context-reference annotations and signal provenance.
 
 Version 1.4.4 also declares asynchronous FIFO requests, payloads and endpoint
 inputs as live signals. Acceptance is evaluated before the owning clock edge;

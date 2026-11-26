@@ -32,16 +32,19 @@ component AsyncFifoWriteSide<T, CAPACITY: int>
 
 	/**
 	 * Binds the supplied clock/reset context and live input signals.
+	 * source identifies the read-domain pointer; the local two-register receiver
+	 * implements its crossing rather than treating that pointer as local data.
 	 * The caller must coordinate reset/clear in both domains before traffic.
 	 */
 	new(
 		domain: IContext,
+		source: IContext,
 		flush: in bool,
 		push: in bool,
-		remote: in logic[POINTER_BITS]
+		@RefContext(source) remote: in logic[POINTER_BITS]
 	)
 	{
-		this.context = domain
+		context = domain
 		this.flush = flush
 		this.push = push
 		this.remote = remote
@@ -52,10 +55,10 @@ component AsyncFifoWriteSide<T, CAPACITY: int>
 	 */
 	process Status[]()
 	{
-		this.address = (binary as uint) as logic[ADDRESS_BITS]
-		this.cleared = clearSeen
-		this.full = gray == ((stage2 as uint) ^ ((3 as uint) << (ADDRESS_BITS - 1))) as logic[POINTER_BITS]
-		this.accepted = !flush && context.rst == 0b0 && push && !full
+		address = (binary as uint) as logic[ADDRESS_BITS]
+		cleared = clearSeen
+		full = gray == ((stage2 as uint) ^ ((3 as uint) << (ADDRESS_BITS - 1))) as logic[POINTER_BITS]
+		accepted = !flush && context.rst == 0b0 && push && !full
 	}
 
 	/**
@@ -63,28 +66,26 @@ component AsyncFifoWriteSide<T, CAPACITY: int>
 	 */
 	process Update()
 	{
-		state Tick {
+		state {
 			if (flush) {
-				this.clearSeen = true
-				this.binary = 0
-				this.gray = 0
-				this.stage1 = 0
-				this.stage2 = 0
+				clearSeen = true
+				binary = 0
+				gray = 0
+				stage1 = 0
+				stage2 = 0
 			} else {
-				this.clearSeen = false
+				clearSeen = false
 				// Advance the synchronizer using its previous first-stage sample.
 				var previous = stage1
-				this.stage1 = remote
-				this.stage2 = previous
+				stage1 = remote
+				stage2 = previous
 
 				if (accepted) {
 					var next = ((binary as uint) + 1) & (((2 * CAPACITY) - 1) as uint)
-					this.binary = next as logic[POINTER_BITS]
-					this.gray = (next ^ (next >> 1)) as logic[POINTER_BITS]
+					binary = next as logic[POINTER_BITS]
+					gray = (next ^ (next >> 1)) as logic[POINTER_BITS]
 				}
 			}
-
-			goto Tick
 		}
 	}
 }

@@ -16,7 +16,7 @@ component Queue8Test
 	 */
 	new()
 	{
-		this.queue = new Queue8()
+		queue = new Queue8()
 	}
 
 	/**
@@ -25,28 +25,28 @@ component Queue8Test
 	@Test
 	fn TestCapacityAndWrapAround()
 	{
-		this.queue.Clear()
+		queue.Clear()
 		var value: byte = 0xFF
-		assert this.queue.TryDequeue(value) == false
+		assert queue.TryDequeue(value) == false
 		assert value == 0x00
 
 		for (var round = 0; round < 3; round++) {
-			assert this.queue.GetSpace() == 8
+			assert queue.GetSpace() == 8
 
 			for (var index = 0; index < 8; index++) {
-				assert this.queue.TryEnqueue(index as byte) == true
+				assert queue.TryEnqueue(index as byte) == true
 			}
 
-			assert this.queue.GetCount() == 8
-			assert this.queue.GetSpace() == 0
-			assert this.queue.TryEnqueue(0xFF) == false
+			assert queue.GetCount() == 8
+			assert queue.GetSpace() == 0
+			assert queue.TryEnqueue(0xFF) == false
 
 			for (var index = 0; index < 8; index++) {
-				assert this.queue.TryDequeue(value) == true
+				assert queue.TryDequeue(value) == true
 				assert value == index as byte
 			}
 
-			assert this.queue.GetCount() == 0
+			assert queue.GetCount() == 0
 		}
 	}
 
@@ -56,16 +56,16 @@ component Queue8Test
 	@Test
 	fn TestClearAndReuse()
 	{
-		this.queue.Clear()
-		assert this.queue.TryEnqueue(0xA5) == true
-		this.queue.Clear()
-		assert this.queue.GetCount() == 0
-		assert this.queue.GetSpace() == 8
+		queue.Clear()
+		assert queue.TryEnqueue(0xA5) == true
+		queue.Clear()
+		assert queue.GetCount() == 0
+		assert queue.GetSpace() == 8
 		var value: byte = 0xFF
-		assert this.queue.TryDequeue(value) == false
+		assert queue.TryDequeue(value) == false
 		assert value == 0x00
-		assert this.queue.TryEnqueue(0x00) == true
-		assert this.queue.TryDequeue(value) == true
+		assert queue.TryEnqueue(0x00) == true
+		assert queue.TryDequeue(value) == true
 		assert value == 0x00
 	}
 }
